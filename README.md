@@ -45,6 +45,17 @@ pnpm dev                          # http://localhost:3000
 | `pnpm db:start` / `pnpm db:stop` | Локал Supabase асаах/унтраах |
 | `pnpm db:reset` | Өгөгдлийн санг цэвэрлэж, бүх migration-ийг дахин ажиллуулах |
 | `pnpm db:types` | Өгөгдлийн сангаас TypeScript төрлүүд үүсгэх |
+| `pnpm db:seed` | Туршилтын өгөгдөл (зөвхөн локал). Бүх хэрэглэгчийн нууц үг `Demo12345` |
+| `pnpm admin:create <имэйл> "<нууц үг>"` | Платформын админ үүсгэх |
+| `pnpm cloud:*`, `pnpm dev:cloud` | Supabase Cloud-тай ажиллах: [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md) |
+
+### Туршилтын хэрэглэгчид (`pnpm db:reset && pnpm db:seed`)
+
+| Имэйл | Дүр |
+|---|---|
+| `admin@demo.test` | Платформын админ |
+| `manager1@demo.test` | Хүчит фитнес: менежер (платформын эрх идэвхтэй) |
+| `manager2@demo.test` | Эрч хүч спорт клуб: менежер (туршилт дуусахад 4 хоног үлдсэн) |
 
 ## Технологи
 

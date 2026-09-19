@@ -20,6 +20,7 @@ export default defineConfig({
         test: {
           name: "db",
           include: ["tests/db/**/*.test.ts"],
+          setupFiles: ["tests/db/setup.ts"],
           environment: "node",
           // Бүх DB тест нэг локал Postgres-ийг хуваалцана.
           fileParallelism: false,

@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --project unit",
     "test:db": "vitest run --project db",
     "test:all": "vitest run",
@@ -20,7 +20,15 @@
     "db:stop": "supabase stop",
     "db:status": "supabase status",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "admin:create": "tsx scripts/make-admin.ts",
+    "dev:cloud": "node --env-file=.env.cloud.local node_modules/next/dist/bin/next dev",
+    "cloud:check": "tsx scripts/cloud.ts check",
+    "cloud:link": "tsx scripts/cloud.ts link",
+    "cloud:push:dry": "tsx scripts/cloud.ts push --dry-run",
+    "cloud:push": "tsx scripts/cloud.ts push",
+    "cloud:admin": "node --env-file=.env.cloud.local --import tsx scripts/make-admin.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.1",

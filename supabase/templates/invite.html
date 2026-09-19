@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="mn">
+  <body style="margin:0;padding:24px;background:#f4f7f7;font-family:Arial,Helvetica,sans-serif;color:#1f2933">
+    <table role="presentation" width="100%" style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px">
+      <tr>
+        <td>
+          <h1 style="margin:0 0 16px;font-size:22px;color:#0f766e">Фитнес Хяналт</h1>
+          <p style="font-size:16px;line-height:1.6;margin:0 0 16px">Сайн байна уу,</p>
+          <p style="font-size:16px;line-height:1.6;margin:0 0 24px">
+            Таныг {{ if .Data.gym_name }}<strong>{{ .Data.gym_name }}</strong>{{ else }}фитнесийн{{ end }}
+            бүртгэлийн системд багшаар урьж байна. Доорх товч дээр дарж нууц үгээ тохируулаад нэвтэрнэ үү.
+          </p>
+          <p style="margin:0 0 24px">
+            <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/set-password"
+               style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:16px">
+              Урилга хүлээн авах
+            </a>
+          </p>
+          <p style="font-size:13px;line-height:1.6;color:#6b7280;margin:0">
+            Холбоос 24 цагийн дотор хүчинтэй. Хугацаа нь дууссан бол менежерээсээ дахин урилга илгээхийг хүснэ үү.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
