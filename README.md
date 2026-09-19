@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Фитнес Хяналт
 
-## Getting Started
+Монголын жижиг фитнесүүдэд зориулсан бүртгэл, хяналтын multi-tenant SaaS платформ (MVP).
+Бүтээх төлөвлөгөө: [docs/PLAN.md](docs/PLAN.md).
 
-First, run the development server:
+> Энэ README-г үе шат бүрт шинэчилнэ. Deploy-ийн бүрэн заавар 5-р үе шатанд нэмэгдэнэ.
+
+## Шаардлагатай программууд
+
+| Программ | Хувилбар | Тайлбар |
+|---|---|---|
+| Node.js | 24 LTS (≥22) | https://nodejs.org |
+| pnpm | 11 | `corepack enable` эсвэл `npm i -g pnpm` |
+| Docker Desktop | сүүлийн хувилбар | Локал Supabase-д хэрэгтэй (Windows дээр WSL2 идэвхжүүлнэ) |
+
+Supabase CLI нь төслийн devDependency тул тусад нь суулгах шаардлагагүй (`pnpm exec supabase ...`).
+
+## Локал орчинд ажиллуулах
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local        # Windows PowerShell: Copy-Item .env.example .env.local
+pnpm db:start                     # Docker дээр Postgres, Auth, Studio, Mailpit асна (анх удаа удаан)
+pnpm db:status                    # Publishable/Secret key-г .env.local-д хуулна
+pnpm dev                          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Локал хаягууд:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Апп: http://localhost:3000
+- Supabase Studio (өгөгдлийн сан харах): http://127.0.0.1:54323
+- Mailpit (илгээсэн имэйлүүд): http://127.0.0.1:54324
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Скриптүүд
 
-## Learn More
+| Команд | Үйлдэл |
+|---|---|
+| `pnpm dev` | Хөгжүүлэлтийн сервер |
+| `pnpm build` / `pnpm start` | Production build ба ажиллуулах |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | TypeScript шалгалт |
+| `pnpm test` | Unit тестүүд (Docker шаардлагагүй) |
+| `pnpm test:db` | Өгөгдлийн сан ба RLS тестүүд (локал Supabase асаалттай байх ёстой) |
+| `pnpm check` | lint + typecheck + unit тест |
+| `pnpm db:start` / `pnpm db:stop` | Локал Supabase асаах/унтраах |
+| `pnpm db:reset` | Өгөгдлийн санг цэвэрлэж, бүх migration-ийг дахин ажиллуулах |
+| `pnpm db:types` | Өгөгдлийн сангаас TypeScript төрлүүд үүсгэх |
 
-To learn more about Next.js, take a look at the following resources:
+## Технологи
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js 16 (App Router), React 19, TypeScript 6, Tailwind CSS 4, shadcn/ui (Radix),
+Supabase (Postgres 17, Auth, Storage, RLS), Zod 4, Vitest 5.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+TypeScript 7.0 гарсан ч JS compiler API-гүй тул `typescript-eslint` (улмаар `eslint-config-next`)
+дэмжихгүй байна. Иймд 6.0.3-ыг ашиглаж, дэмжлэг гармагц шилжинэ. ESLint мөн адил шалтгаанаар 9.x дээр байна
+(`eslint-plugin-react`, `-import`, `-jsx-a11y` нь ESLint 10-ыг хараахан дэмжээгүй).
