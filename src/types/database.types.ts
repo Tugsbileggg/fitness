@@ -67,6 +67,13 @@ export type Database = {
             foreignKeyName: "client_memberships_gym_id_client_id_fkey"
             columns: ["gym_id", "client_id"]
             isOneToOne: false
+            referencedRelation: "client_status_v"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "client_memberships_gym_id_client_id_fkey"
+            columns: ["gym_id", "client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["gym_id", "id"]
           },
@@ -76,6 +83,71 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "payments"
             referencedColumns: ["gym_id", "id"]
+          },
+        ]
+      }
+      client_notices: {
+        Row: {
+          client_id: string
+          created_at: string
+          deleted_at: string | null
+          ends_on: string
+          gym_id: string
+          id: string
+          note: string | null
+          notified_at: string
+          notified_by: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          deleted_at?: string | null
+          ends_on: string
+          gym_id: string
+          id?: string
+          note?: string | null
+          notified_at?: string
+          notified_by?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          ends_on?: string
+          gym_id?: string
+          id?: string
+          note?: string | null
+          notified_at?: string
+          notified_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notices_gym_id_client_id_fkey"
+            columns: ["gym_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "client_status_v"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "client_notices_gym_id_client_id_fkey"
+            columns: ["gym_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "client_notices_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notices_notified_by_fkey"
+            columns: ["notified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -424,6 +496,13 @@ export type Database = {
             foreignKeyName: "payments_gym_id_client_id_fkey"
             columns: ["gym_id", "client_id"]
             isOneToOne: false
+            referencedRelation: "client_status_v"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "payments_gym_id_client_id_fkey"
+            columns: ["gym_id", "client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["gym_id", "id"]
           },
@@ -592,9 +671,59 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_status_v: {
+        Row: {
+          assigned_trainer_id: string | null
+          birth_year: number | null
+          days_left: number | null
+          ends_on: string | null
+          full_name: string | null
+          gender: Database["public"]["Enums"]["gender"] | null
+          gym_id: string | null
+          id: string | null
+          last_plan_name: string | null
+          notice_id: string | null
+          notice_note: string | null
+          notified_at: string | null
+          notified_by_name: string | null
+          phone: string | null
+          starts_on: string | null
+          status: Database["public"]["Enums"]["client_membership_status"] | null
+          trainer_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_gym_id_assigned_trainer_id_fkey"
+            columns: ["gym_id", "assigned_trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "clients_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      dashboard_summary: {
+        Args: { p_gym_id: string }
+        Returns: {
+          active_count: number
+          expired_count: number
+          expired_recent_count: number
+          expiring_count: number
+          month_new_clients: number
+          month_payment_count: number
+          month_renewed_clients: number
+          month_revenue: number
+          none_count: number
+        }[]
+      }
       get_my_context: {
         Args: never
         Returns: {
@@ -645,6 +774,7 @@ export type Database = {
       }
     }
     Enums: {
+      client_membership_status: "active" | "expiring" | "expired" | "none"
       discount_type: "none" | "amount" | "percent"
       gender: "male" | "female"
       gym_subscription_status: "trial" | "active" | "past_due" | "suspended"
@@ -780,6 +910,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      client_membership_status: ["active", "expiring", "expired", "none"],
       discount_type: ["none", "amount", "percent"],
       gender: ["male", "female"],
       gym_subscription_status: ["trial", "active", "past_due", "suspended"],

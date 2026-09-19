@@ -276,6 +276,30 @@ async function seedPayments(
   return count;
 }
 
+const NOTICE_NOTES = ["Утсаар хэлсэн", "Биечлэн хэлсэн, сунгана гэсэн", null];
+
+/** Дуусах гэж буй зарим үйлчлүүлэгчид "Мэдэгдсэн" тэмдэглэл (менежерийн эрхээр, RLS-тэй). */
+async function seedNotices(rng: Rng, gymId: string, manager: Payer) {
+  const { data, error } = await manager
+    .from("client_status_v")
+    .select("id, ends_on")
+    .eq("gym_id", gymId)
+    .in("status", ["expiring", "expired"])
+    .order("days_left");
+  if (error) throw error;
+  const picks = (data ?? []).filter((_, i) => i % 3 === 1);
+  for (const row of picks) {
+    const { error: insertError } = await manager.from("client_notices").insert({
+      gym_id: gymId,
+      client_id: row.id!,
+      ends_on: row.ends_on!,
+      note: rng.pick(NOTICE_NOTES),
+    });
+    if (insertError) throw insertError;
+  }
+  return picks.length;
+}
+
 async function main() {
   const supabase = adminClient();
   assertLocal();
@@ -300,6 +324,7 @@ async function main() {
     const trainerEmail = trainers.find((t) => t.email)?.email;
     const trainer = trainerEmail ? await signedInClient(trainerEmail) : null;
     const paymentCount = await seedPayments(rng, today, clientIds, gymPlans, manager, trainer);
+    await seedNotices(rng, gymId, manager);
     for (const t of trainers) if (t.email) trainerLogins.push(`  ${t.email.padEnd(20)} — ${gym.name} багш (${t.name})`);
     console.log(`✓ ${gym.name}: ${trainers.length} багш, ${clientIds.length} үйлчлүүлэгч, ${gymPlans.size} багц, ${paymentCount} төлбөр`);
   }

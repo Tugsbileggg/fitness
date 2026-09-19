@@ -7,7 +7,7 @@ import { Pagination } from "@/components/pagination";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ClientFilters } from "@/features/clients/components/client-filters";
-import { listClients } from "@/features/clients/queries";
+import { isStatusFilter, listClients } from "@/features/clients/queries";
 import { ageFromBirthYear, GENDER_LABELS } from "@/features/clients/schemas";
 import { MembershipBadge } from "@/features/payments/components/membership-badge";
 import { trainerOptions } from "@/features/trainers/queries";
@@ -27,13 +27,15 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
   const q = param(sp.q);
   const trainer = param(sp.trainer);
   const trainerId = trainer === "none" || isUuid(trainer) ? trainer : undefined;
+  const statusParam = param(sp.status);
+  const status = isStatusFilter(statusParam) ? statusParam : undefined;
   const page = Number(param(sp.page)) || 1;
 
   const [{ rows, total, pageSize }, trainers] = await Promise.all([
-    listClients(gym.id, { q, trainerId, page }),
+    listClients(gym.id, { q, trainerId, status, page }),
     trainerOptions(gym.id),
   ]);
-  const filtered = Boolean(q || trainerId);
+  const filtered = Boolean(q || trainerId || status);
 
   const addButton = gym.isWritable ? (
     <Button asChild>
@@ -81,7 +83,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="truncate font-medium">{c.full_name}</span>
                   <MembershipBadge
-                    endsOn={c.membership[0]?.ends_on}
+                    endsOn={c.ends_on}
                     today={today}
                     threshold={gym.expiringThresholdDays}
                   />
@@ -89,9 +91,9 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
                 <div className="flex flex-wrap gap-x-3 text-sm text-muted-foreground">
                   <span>{formatPhone(c.phone)}</span>
                   <span>
-                    {GENDER_LABELS[c.gender]}, {ageFromBirthYear(c.birth_year, today)} настай
+                    {c.gender && GENDER_LABELS[c.gender]}, {ageFromBirthYear(c.birth_year ?? 0, today)} настай
                   </span>
-                  {c.trainer && <span>Багш: {c.trainer.full_name}</span>}
+                  {c.trainer_name && <span>Багш: {c.trainer_name}</span>}
                 </div>
               </div>
               <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" />
@@ -105,7 +107,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
         pageSize={pageSize}
         total={total}
         basePath="/clients"
-        params={{ q, trainer: trainerId }}
+        params={{ q, trainer: trainerId, status }}
       />
     </>
   );
