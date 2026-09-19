@@ -34,6 +34,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          assigned_trainer_id: string | null
+          birth_year: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          gym_id: string
+          id: string
+          notes: string | null
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_trainer_id?: string | null
+          birth_year: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          full_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          gym_id: string
+          id?: string
+          notes?: string | null
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_trainer_id?: string | null
+          birth_year?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          full_name?: string
+          gender?: Database["public"]["Enums"]["gender"]
+          gym_id?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_gym_id_assigned_trainer_id_fkey"
+            columns: ["gym_id", "assigned_trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "clients_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_subscriptions: {
         Row: {
           created_at: string
@@ -237,6 +314,76 @@ export type Database = {
         }
         Relationships: []
       }
+      trainers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          gym_id: string
+          id: string
+          invited_at: string | null
+          is_active: boolean
+          notes: string | null
+          phone: string
+          specialization: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          gym_id: string
+          id?: string
+          invited_at?: string | null
+          is_active?: boolean
+          notes?: string | null
+          phone: string
+          specialization?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          gym_id?: string
+          id?: string
+          invited_at?: string | null
+          is_active?: boolean
+          notes?: string | null
+          phone?: string
+          specialization?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainers_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -260,8 +407,17 @@ export type Database = {
           user_id: string
         }[]
       }
+      trainer_accounts: {
+        Args: { p_gym_id: string }
+        Returns: {
+          email_confirmed: boolean
+          last_sign_in_at: string
+          trainer_id: string
+        }[]
+      }
     }
     Enums: {
+      gender: "male" | "female"
       gym_subscription_status: "trial" | "active" | "past_due" | "suspended"
       payment_method: "cash" | "bank_transfer" | "qpay"
       staff_role: "manager" | "trainer"
@@ -395,6 +551,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      gender: ["male", "female"],
       gym_subscription_status: ["trial", "active", "past_due", "suspended"],
       payment_method: ["cash", "bank_transfer", "qpay"],
       staff_role: ["manager", "trainer"],

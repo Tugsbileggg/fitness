@@ -4,6 +4,12 @@
 // дууссан, туршилт, анхааруулга) харагдана.
 import { addDaysISO, todayUB } from "../src/lib/dates";
 import { adminClient, findUserByEmail, type AdminClient } from "./lib";
+import { clientNote, createRng, mongolianName, phoneNumber, type Rng, TRAINER_PROFILES } from "./seed-data";
+
+const CLIENTS_PER_GYM = 40;
+const TRAINERS_PER_GYM = 3;
+/** Нэвтрэх эрхтэй багшийн тоо (бусад нь зөвхөн бүртгэл). */
+const TRAINERS_WITH_LOGIN = 2;
 
 const PASSWORD = process.env.SEED_PASSWORD || "Demo12345";
 
@@ -111,6 +117,64 @@ async function seedGym(supabase: AdminClient, gym: SeedGym, plans: Map<string, s
   return { gymId, managerId };
 }
 
+async function seedTrainers(supabase: AdminClient, gymIndex: number, gymId: string) {
+  const trainers: { id: string; email: string | null; name: string }[] = [];
+  for (let i = 0; i < TRAINERS_PER_GYM; i++) {
+    const profile = TRAINER_PROFILES[gymIndex * TRAINERS_PER_GYM + i];
+    const email = i < TRAINERS_WITH_LOGIN ? `trainer${gymIndex + 1}.${i + 1}@demo.test` : null;
+    const { data: trainer } = await supabase
+      .from("trainers")
+      .insert({
+        gym_id: gymId,
+        full_name: profile.name,
+        phone: `9${gymIndex + 1}0${i + 1}1122`.slice(0, 8),
+        specialization: profile.specialization,
+        email,
+      })
+      .select("id")
+      .single()
+      .throwOnError();
+
+    if (email) {
+      // Урилга хүлээн авч нууц үгээ тохируулсан багштай адил.
+      const userId = await createUser(supabase, email, { full_name: profile.name });
+      await supabase.from("gym_users").insert({ gym_id: gymId, user_id: userId, role: "trainer" }).throwOnError();
+      await supabase
+        .from("trainers")
+        .update({ user_id: userId, invited_at: new Date().toISOString() })
+        .eq("id", trainer.id)
+        .throwOnError();
+    }
+    trainers.push({ id: trainer.id, email, name: profile.name });
+  }
+  return trainers;
+}
+
+async function seedClients(
+  supabase: AdminClient,
+  rng: Rng,
+  gymId: string,
+  createdBy: string,
+  trainerIds: string[],
+) {
+  const usedPhones = new Set<string>();
+  const rows = Array.from({ length: CLIENTS_PER_GYM }, () => {
+    const gender = rng.chance(0.55) ? ("female" as const) : ("male" as const);
+    return {
+      gym_id: gymId,
+      full_name: mongolianName(rng, gender),
+      phone: phoneNumber(rng, usedPhones),
+      gender,
+      birth_year: rng.int(1968, 2008),
+      assigned_trainer_id: rng.chance(0.7) ? rng.pick(trainerIds) : null,
+      notes: clientNote(rng),
+      created_by: createdBy,
+    };
+  });
+  const { data } = await supabase.from("clients").insert(rows).select("id").throwOnError();
+  return data.map((c) => c.id);
+}
+
 async function main() {
   const supabase = adminClient();
   assertLocal();
@@ -124,14 +188,20 @@ async function main() {
   const { plans } = await seedPlatform(supabase);
   console.log(`✓ Платформын админ ба ${plans.size} тариф`);
 
-  for (const gym of GYMS) {
-    await seedGym(supabase, gym, plans, today);
-    console.log(`✓ ${gym.name} (${gym.manager.email})`);
+  const trainerLogins: string[] = [];
+  for (const [index, gym] of GYMS.entries()) {
+    const rng = createRng(1000 + index);
+    const { gymId, managerId } = await seedGym(supabase, gym, plans, today);
+    const trainers = await seedTrainers(supabase, index, gymId);
+    const clientIds = await seedClients(supabase, rng, gymId, managerId, trainers.map((t) => t.id));
+    for (const t of trainers) if (t.email) trainerLogins.push(`  ${t.email.padEnd(20)} — ${gym.name} багш (${t.name})`);
+    console.log(`✓ ${gym.name}: ${trainers.length} багш, ${clientIds.length} үйлчлүүлэгч`);
   }
 
   console.log(`\nБүх хэрэглэгчийн нууц үг: ${PASSWORD}`);
   console.log("  admin@demo.test      — платформын админ");
   for (const gym of GYMS) console.log(`  ${gym.manager.email.padEnd(20)} — ${gym.name} менежер`);
+  for (const line of trainerLogins) console.log(line);
 }
 
 main().catch((e) => {

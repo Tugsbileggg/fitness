@@ -16,7 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 type BaseFieldProps<T extends FieldValues> = {
-  control: Control<T>;
+  // Гурав дахь параметр: zod transform-ийн дараах төрөл (маягт бүрт өөр).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control: Control<T, any, any>;
   name: FieldPath<T>;
   label: string;
   description?: ReactNode;
@@ -168,7 +170,8 @@ export function FormError({ message }: { message?: string | null }) {
 
 /** Server Action-оос ирсэн талбарын алдаануудыг react-hook-form-д тусгана. */
 export function applyFieldErrors<T extends FieldValues>(
-  form: UseFormReturn<T>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<T, any, any>,
   fieldErrors: Record<string, string> | undefined,
 ) {
   if (!fieldErrors) return;
