@@ -1,4 +1,4 @@
-import { PencilIcon, PhoneIcon } from "lucide-react";
+import { PencilIcon, PhoneIcon, WalletIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DeleteClientButton } from "@/features/clients/components/delete-client-button";
 import { getClient } from "@/features/clients/queries";
 import { ageFromBirthYear, GENDER_LABELS } from "@/features/clients/schemas";
+import { MembershipBadge } from "@/features/payments/components/membership-badge";
+import { PaymentHistory } from "@/features/payments/components/payment-history";
+import { getMembership, listClientPayments } from "@/features/payments/queries";
 import { requireGymContext } from "@/lib/auth/context";
 import { formatDate } from "@/lib/dates";
 import { formatPhone } from "@/lib/phone";
@@ -19,8 +22,13 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
   const { id } = await params;
   const { gym, today } = await requireGymContext();
   if (!isUuid(id)) notFound();
-  const client = await getClient(gym.id, id);
+  const [client, membership, payments] = await Promise.all([
+    getClient(gym.id, id),
+    getMembership(id),
+    gym.isManager ? listClientPayments(gym.id, id) : Promise.resolve([]),
+  ]);
   if (!client || client.deleted_at) notFound();
+  const endsOn = membership?.ends_on ?? null;
 
   const details: Array<[string, React.ReactNode]> = [
     [
@@ -61,9 +69,25 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
 
       <Card>
         <CardHeader>
-          <CardTitle>Эрх</CardTitle>
-          <CardDescription>Эрхийн багц, төлбөрийн бүртгэл дараагийн шатанд нэмэгдэнэ.</CardDescription>
+          <CardTitle className="flex flex-wrap items-center gap-2">
+            Эрх <MembershipBadge endsOn={endsOn} today={today} threshold={gym.expiringThresholdDays} />
+          </CardTitle>
+          <CardDescription>
+            {endsOn
+              ? `${membership?.last_plan_name ?? "Багц"} · ${formatDate(membership?.starts_on)} – ${formatDate(endsOn)}`
+              : "Одоогоор эрхийн төлбөр бүртгэгдээгүй байна."}
+          </CardDescription>
         </CardHeader>
+        {gym.isWritable && (
+          <CardContent>
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link href={`/clients/${client.id}/pay`}>
+                <WalletIcon />
+                {endsOn ? "Төлбөр бүртгэх / Сунгах" : "Төлбөр бүртгэх"}
+              </Link>
+            </Button>
+          </CardContent>
+        )}
       </Card>
 
       <Card>
@@ -84,6 +108,17 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
           )}
         </CardContent>
       </Card>
+
+      {gym.isManager && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Төлбөрийн түүх</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PaymentHistory payments={payments} clientId={client.id} canVoid={gym.isWritable} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

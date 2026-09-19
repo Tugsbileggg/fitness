@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { ClientFilters } from "@/features/clients/components/client-filters";
 import { listClients } from "@/features/clients/queries";
 import { ageFromBirthYear, GENDER_LABELS } from "@/features/clients/schemas";
+import { MembershipBadge } from "@/features/payments/components/membership-badge";
 import { trainerOptions } from "@/features/trainers/queries";
 import { requireGymContext } from "@/lib/auth/context";
 import { formatPhone } from "@/lib/phone";
@@ -77,7 +78,14 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
               className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
             >
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{c.full_name}</div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="truncate font-medium">{c.full_name}</span>
+                  <MembershipBadge
+                    endsOn={c.membership[0]?.ends_on}
+                    today={today}
+                    threshold={gym.expiringThresholdDays}
+                  />
+                </div>
                 <div className="flex flex-wrap gap-x-3 text-sm text-muted-foreground">
                   <span>{formatPhone(c.phone)}</span>
                   <span>

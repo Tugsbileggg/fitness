@@ -90,12 +90,13 @@ export const getSessionContext = cache(async (): Promise<SessionContext | null> 
 type WithGym = SessionContext & { gym: GymContext };
 
 /**
- * Фитнесийн хэсгийн хуудас, Server Action-д. Нэвтрээгүй бол /login, фитнесгүй админ бол /admin,
+ * Фитнесийн хэсгийн хуудас, Server Action-д. Нэвтрээгүй бол /auth/signout → /login, фитнесгүй админ бол /admin,
  * идэвхтэй эрхгүй бол /no-access руу. managerOnly үед багшийг /dashboard руу буцаана.
  */
 export async function requireGymContext(options?: { managerOnly?: boolean }): Promise<WithGym> {
   const ctx = await getSessionContext();
-  if (!ctx) redirect("/login");
+  // Session байхгүй эсвэл хэрэглэгч DB-д олдоогүй: cookie-г цэвэрлээд /login руу (redirect гогцооноос сэргийлнэ).
+  if (!ctx) redirect("/auth/signout");
   if (!ctx.gym) redirect(ctx.isPlatformAdmin ? "/admin" : "/no-access");
   if (options?.managerOnly && !ctx.gym.isManager) redirect("/dashboard");
   return ctx as WithGym;
@@ -103,7 +104,7 @@ export async function requireGymContext(options?: { managerOnly?: boolean }): Pr
 
 export async function requireAdmin(): Promise<SessionContext> {
   const ctx = await getSessionContext();
-  if (!ctx) redirect("/login");
+  if (!ctx) redirect("/auth/signout");
   if (!ctx.isPlatformAdmin) redirect("/dashboard");
   return ctx;
 }

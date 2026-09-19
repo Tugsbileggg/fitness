@@ -2,7 +2,9 @@
 //   pnpm db:reset && pnpm db:seed
 // Бүх огноо "өнөөдөр"-өөс харьцангуй тул хэзээ ажиллуулсан бүх төлөв (идэвхтэй, дуусах гэж буй,
 // дууссан, туршилт, анхааруулга) харагдана.
-import { addDaysISO, todayUB } from "../src/lib/dates";
+import { createClient } from "@supabase/supabase-js";
+import { addDaysISO, addMonthsISO, todayUB } from "../src/lib/dates";
+import type { Database } from "../src/types/database.types";
 import { adminClient, findUserByEmail, type AdminClient } from "./lib";
 import { clientNote, createRng, mongolianName, phoneNumber, type Rng, TRAINER_PROFILES } from "./seed-data";
 
@@ -175,6 +177,105 @@ async function seedClients(
   return data.map((c) => c.id);
 }
 
+const GYM_PLANS = [
+  { name: "1 сар", duration_months: 1, price: 80000 },
+  { name: "3 сар", duration_months: 3, price: 210000 },
+  { name: "6 сар", duration_months: 6, price: 390000 },
+  { name: "1 жил", duration_months: 12, price: 720000 },
+];
+
+async function seedPlans(supabase: AdminClient, gymId: string) {
+  const { data } = await supabase
+    .from("membership_plans")
+    .insert(GYM_PLANS.map((p, i) => ({ ...p, gym_id: gymId, sort_order: i })))
+    .select("id, duration_months")
+    .throwOnError();
+  return new Map(data.map((p) => [p.duration_months, p.id]));
+}
+
+/** Хэрэглэгчээр нэвтэрсэн client: төлбөрийг бодит RPC-ээр (RLS, эрхийн шалгалттай) бүртгэнэ. */
+async function signedInClient(email: string) {
+  const client = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  const { error } = await client.auth.signInWithPassword({ email, password: PASSWORD });
+  if (error) throw new Error(`${email}: ${error.message}`);
+  return client;
+}
+
+type Payer = Awaited<ReturnType<typeof signedInClient>>;
+type PaymentPlan = { months: number; paidOn: string; discount?: { type: "amount" | "percent"; value: number } };
+
+/**
+ * Үйлчлүүлэгч бүрт төлөвийн хуваарилалт (40 үйлчлүүлэгч):
+ *  0–3   эрхгүй · 4–11 дууссан (1–28 хоногийн өмнө) · 12–19 дуусах гэж буй (0–7 хоног)
+ *  20–39 идэвхтэй (энэ сарын шинэ/сунгалт, урт хугацааны, хөнгөлөлттэй)
+ */
+function paymentScenario(index: number, today: string, rng: Rng): PaymentPlan[] {
+  const monthAgo = addMonthsISO(today, -1);
+  const expiredDays = [1, 2, 4, 6, 9, 13, 20, 28];
+  if (index < 4) return [];
+  if (index < 12) {
+    const d = expiredDays[index - 4];
+    const last = { months: 1, paidOn: addDaysISO(monthAgo, -d) };
+    // Заримд нь өмнөх сунгалтын түүх.
+    return index % 3 === 0 ? [{ months: 1, paidOn: addDaysISO(addMonthsISO(today, -2), -d) }, last] : [last];
+  }
+  if (index < 20) {
+    const daysLeft = index - 12;
+    const last: PaymentPlan = { months: 1, paidOn: addDaysISO(monthAgo, daysLeft) };
+    return index % 2 === 0 ? [{ months: 3, paidOn: addDaysISO(addMonthsISO(today, -4), daysLeft) }, last] : [last];
+  }
+  const thisMonthDay = () => addDaysISO(today, -rng.int(0, Number(today.slice(8, 10)) - 1));
+  const discount = rng.chance(0.25)
+    ? rng.chance(0.5)
+      ? { type: "percent" as const, value: rng.pick([10, 15, 20]) }
+      : { type: "amount" as const, value: rng.pick([5000, 10000, 20000]) }
+    : undefined;
+  switch (index % 4) {
+    case 0: // энэ сард шинээр
+      return [{ months: rng.pick([1, 3]), paidOn: thisMonthDay(), discount }];
+    case 1: // идэвхтэй байхдаа энэ сард сунгасан
+      return [
+        { months: 3, paidOn: addDaysISO(addMonthsISO(today, -3), rng.int(3, 12)) },
+        { months: rng.pick([1, 3, 6]), paidOn: thisMonthDay(), discount },
+      ];
+    case 2: // урт хугацааны
+      return [{ months: rng.pick([6, 12]), paidOn: addDaysISO(addMonthsISO(today, -rng.int(1, 4)), -rng.int(0, 20)), discount }];
+    default: // өнгөрсөн сард авсан 3 сарын эрх
+      return [{ months: 3, paidOn: addDaysISO(monthAgo, -rng.int(0, 15)) }];
+  }
+}
+
+async function seedPayments(
+  rng: Rng,
+  today: string,
+  clientIds: string[],
+  plans: Map<number, string>,
+  manager: Payer,
+  trainer: Payer | null,
+) {
+  let count = 0;
+  for (const [index, clientId] of clientIds.entries()) {
+    for (const p of paymentScenario(index, today, rng)) {
+      const payer = trainer && rng.chance(0.25) ? trainer : manager;
+      const { error } = await payer.rpc("record_payment", {
+        p_client_id: clientId,
+        p_plan_id: plans.get(p.months)!,
+        p_paid_on: p.paidOn,
+        p_method: rng.chance(0.6) ? "cash" : "bank_transfer",
+        p_discount_type: p.discount?.type ?? "none",
+        p_discount_value: p.discount?.value ?? 0,
+      });
+      if (error) throw new Error(`record_payment (${index}): ${error.message}`);
+      count++;
+    }
+  }
+  return count;
+}
+
 async function main() {
   const supabase = adminClient();
   assertLocal();
@@ -194,8 +295,13 @@ async function main() {
     const { gymId, managerId } = await seedGym(supabase, gym, plans, today);
     const trainers = await seedTrainers(supabase, index, gymId);
     const clientIds = await seedClients(supabase, rng, gymId, managerId, trainers.map((t) => t.id));
+    const gymPlans = await seedPlans(supabase, gymId);
+    const manager = await signedInClient(gym.manager.email);
+    const trainerEmail = trainers.find((t) => t.email)?.email;
+    const trainer = trainerEmail ? await signedInClient(trainerEmail) : null;
+    const paymentCount = await seedPayments(rng, today, clientIds, gymPlans, manager, trainer);
     for (const t of trainers) if (t.email) trainerLogins.push(`  ${t.email.padEnd(20)} — ${gym.name} багш (${t.name})`);
-    console.log(`✓ ${gym.name}: ${trainers.length} багш, ${clientIds.length} үйлчлүүлэгч`);
+    console.log(`✓ ${gym.name}: ${trainers.length} багш, ${clientIds.length} үйлчлүүлэгч, ${gymPlans.size} багц, ${paymentCount} төлбөр`);
   }
 
   console.log(`\nБүх хэрэглэгчийн нууц үг: ${PASSWORD}`);

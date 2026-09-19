@@ -11,7 +11,7 @@ export type ClientListFilters = {
 };
 
 const LIST_COLUMNS =
-  "id, full_name, phone, gender, birth_year, created_at, assigned_trainer_id, trainer:trainers!clients_gym_id_assigned_trainer_id_fkey(full_name)";
+  "id, full_name, phone, gender, birth_year, created_at, assigned_trainer_id, trainer:trainers!clients_gym_id_assigned_trainer_id_fkey(full_name), membership:client_memberships(ends_on)";
 
 export async function listClients(gymId: string, filters: ClientListFilters) {
   const supabase = await createClient();

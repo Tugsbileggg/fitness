@@ -122,3 +122,53 @@ export async function makePastDue(db: Db, gymId: string) {
 }
 
 export const PERMISSION_DENIED = "42501";
+
+export async function insertClient(db: Db, gymId: string, name = "Үйлчлүүлэгч") {
+  const { rows } = await db.query<{ id: string }>(
+    `insert into public.clients (gym_id, full_name, phone, gender, birth_year)
+     values ($1, $2, '88112233', 'female', 1995) returning id`,
+    [gymId, name],
+  );
+  return rows[0].id;
+}
+
+export async function insertPlan(
+  db: Db,
+  gymId: string,
+  opts: { name?: string; months?: number; price?: number; active?: boolean } = {},
+) {
+  const { rows } = await db.query<{ id: string }>(
+    `insert into public.membership_plans (gym_id, name, duration_months, price, is_active)
+     values ($1, $2, $3, $4, $5) returning id`,
+    [gymId, opts.name ?? "1 сар", opts.months ?? 1, opts.price ?? 80000, opts.active ?? true],
+  );
+  return rows[0].id;
+}
+
+/** record_payment RPC-г дуудна (asUser дотор). */
+export function recordPayment(
+  db: Db,
+  args: {
+    clientId: string;
+    planId: string;
+    paidOn?: string;
+    method?: string;
+    discountType?: string;
+    discountValue?: number;
+  },
+) {
+  return run<{ payment_id: string; starts_on: string; ends_on: string; amount: string; is_renewal: boolean }>(
+    db,
+    `select payment_id, starts_on::text, ends_on::text, amount, is_renewal
+       from public.record_payment($1, $2, coalesce($3::date, app.today_ub()), $4::public.payment_method,
+                                  $5::public.discount_type, $6)`,
+    [
+      args.clientId,
+      args.planId,
+      args.paidOn ?? null,
+      args.method ?? "cash",
+      args.discountType ?? "none",
+      args.discountValue ?? 0,
+    ],
+  );
+}

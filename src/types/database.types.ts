@@ -34,6 +34,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_memberships: {
+        Row: {
+          client_id: string
+          ends_on: string | null
+          gym_id: string
+          last_payment_id: string | null
+          last_plan_name: string | null
+          starts_on: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          ends_on?: string | null
+          gym_id: string
+          last_payment_id?: string | null
+          last_plan_name?: string | null
+          starts_on?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          ends_on?: string | null
+          gym_id?: string
+          last_payment_id?: string | null
+          last_plan_name?: string | null
+          starts_on?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_memberships_gym_id_client_id_fkey"
+            columns: ["gym_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "client_memberships_gym_id_last_payment_id_fkey"
+            columns: ["gym_id", "last_payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["gym_id", "id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           assigned_trainer_id: string | null
@@ -251,6 +296,167 @@ export type Database = {
           },
         ]
       }
+      membership_plans: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          duration_months: number
+          gym_id: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          duration_months: number
+          gym_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          duration_months?: number
+          gym_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_plans_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          discount_amount: number
+          discount_type: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          duration_months: number
+          ends_on: string
+          gym_id: string
+          id: string
+          is_renewal: boolean
+          list_price: number
+          method: Database["public"]["Enums"]["payment_method"]
+          note: string | null
+          paid_on: string
+          plan_id: string
+          plan_name: string
+          recorded_by: string
+          seq: number
+          starts_on: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string
+          discount_amount?: number
+          discount_type?: Database["public"]["Enums"]["discount_type"]
+          discount_value?: number
+          duration_months: number
+          ends_on: string
+          gym_id: string
+          id?: string
+          is_renewal: boolean
+          list_price: number
+          method: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          paid_on: string
+          plan_id: string
+          plan_name: string
+          recorded_by: string
+          seq?: never
+          starts_on: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          discount_amount?: number
+          discount_type?: Database["public"]["Enums"]["discount_type"]
+          discount_value?: number
+          duration_months?: number
+          ends_on?: string
+          gym_id?: string
+          id?: string
+          is_renewal?: boolean
+          list_price?: number
+          method?: Database["public"]["Enums"]["payment_method"]
+          note?: string | null
+          paid_on?: string
+          plan_id?: string
+          plan_name?: string
+          recorded_by?: string
+          seq?: never
+          starts_on?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_gym_id_client_id_fkey"
+            columns: ["gym_id", "client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "payments_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_gym_id_plan_id_fkey"
+            columns: ["gym_id", "plan_id"]
+            isOneToOne: false
+            referencedRelation: "membership_plans"
+            referencedColumns: ["gym_id", "id"]
+          },
+          {
+            foreignKeyName: "payments_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_plans: {
         Row: {
           created_at: string
@@ -407,6 +613,24 @@ export type Database = {
           user_id: string
         }[]
       }
+      record_payment: {
+        Args: {
+          p_client_id: string
+          p_discount_type?: Database["public"]["Enums"]["discount_type"]
+          p_discount_value?: number
+          p_method: Database["public"]["Enums"]["payment_method"]
+          p_note?: string
+          p_paid_on: string
+          p_plan_id: string
+        }
+        Returns: {
+          amount: number
+          ends_on: string
+          is_renewal: boolean
+          payment_id: string
+          starts_on: string
+        }[]
+      }
       trainer_accounts: {
         Args: { p_gym_id: string }
         Returns: {
@@ -415,8 +639,13 @@ export type Database = {
           trainer_id: string
         }[]
       }
+      void_payment: {
+        Args: { p_payment_id: string; p_reason: string }
+        Returns: undefined
+      }
     }
     Enums: {
+      discount_type: "none" | "amount" | "percent"
       gender: "male" | "female"
       gym_subscription_status: "trial" | "active" | "past_due" | "suspended"
       payment_method: "cash" | "bank_transfer" | "qpay"
@@ -551,6 +780,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      discount_type: ["none", "amount", "percent"],
       gender: ["male", "female"],
       gym_subscription_status: ["trial", "active", "past_due", "suspended"],
       payment_method: ["cash", "bank_transfer", "qpay"],

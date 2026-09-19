@@ -1,4 +1,11 @@
-import { DumbbellIcon, LayoutDashboardIcon, type LucideIcon, UsersIcon } from "lucide-react";
+import {
+  DumbbellIcon,
+  LayoutDashboardIcon,
+  type LucideIcon,
+  TagsIcon,
+  UsersIcon,
+  WalletIcon,
+} from "lucide-react";
 import type { StaffRole } from "@/lib/auth/context";
 
 export type NavItem = {
@@ -28,6 +35,20 @@ export const NAV_ITEMS: NavItem[] = [
     icon: UsersIcon,
     roles: ["manager", "trainer"],
     primary: true,
+  },
+  {
+    href: "/payments",
+    label: "Төлбөрүүд",
+    shortLabel: "Төлбөр",
+    icon: WalletIcon,
+    roles: ["manager"],
+    primary: true,
+  },
+  {
+    href: "/plans",
+    label: "Эрхийн багц",
+    icon: TagsIcon,
+    roles: ["manager"],
   },
   {
     href: "/trainers",
