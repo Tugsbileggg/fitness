@@ -105,7 +105,8 @@ export async function inviteTrainer(trainerId: string): Promise<ActionResult> {
 
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(trainer.email, {
     data: { full_name: trainer.full_name, gym_name: auth.ctx.gym.name },
-    redirectTo: `${publicEnv.siteUrl}/set-password`,
+    // Анхдагч загвар session-ийг #hash-аар дамжуулдаг тул browser дээрх /auth/callback хүлээн авна.
+    redirectTo: `${publicEnv.siteUrl}/auth/callback?next=/set-password`,
   });
   if (inviteError) {
     if (inviteError.code === "email_exists" || inviteError.status === 422) {

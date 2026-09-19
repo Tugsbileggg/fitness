@@ -33,27 +33,34 @@ pnpm cloud:push          # migration-уудыг cloud DB-д ажиллуулна
 Шинэ үе шат бүрт migration нэмэгдэх тул тухай бүр `pnpm cloud:push`-ийг дахин ажиллуулна.
 `supabase/migrations` доторх бүх файл нэг удаа л ажиллана, Supabase аль нь ажилласныг өөрөө хянадаг.
 
-## 3. Dashboard дээрх Auth тохиргоо
+## 3. Auth тохиргоо
 
-Эдгээр тохиргоо migration-д ордоггүй тул гараар хийнэ.
+```bash
+pnpm cloud:auth
+```
 
-1. **Authentication → URL Configuration**
-   - *Site URL*: одоохондоо `http://localhost:3000`. Deploy хийсний дараа production домэйн болгоно.
-   - *Redirect URLs*: `http://localhost:3000/**`. Дараа нь `https://<домэйн>/**`-ийг нэмнэ.
-2. **Authentication → Sign In / Providers → Email**
-   - *Confirm email*: асаалттай.
-   - *Minimum password length*: `8`.
-   - *Email OTP Expiration*: `86400` (урилгын холбоос 24 цаг хүчинтэй).
-3. **Authentication → Emails → Templates**. `supabase/templates/`-ээс хуулна:
+Энэ команд Management API-аар дараах тохиргоог хийнэ:
+- Site URL: `.env.cloud.local` дахь `NEXT_PUBLIC_SITE_URL`.
+- Redirect URL-ууд.
+- Нууц үгийн доод урт 8.
+- Имэйлийн холбоос 24 цаг хүчинтэй.
+- Имэйл баталгаажуулалт асаалттай.
 
-   | Загвар | Subject | Файл |
-   |---|---|---|
-   | Confirm signup | Имэйл хаягаа баталгаажуулна уу | `confirmation.html` |
-   | Invite user | Таныг фитнесийн системд урьж байна | `invite.html` |
-   | Reset password | Нууц үг сэргээх | `recovery.html` |
+Deploy хийгээд домэйн солигдох бүрт `NEXT_PUBLIC_SITE_URL`-ийг шинэчлээд дахин ажиллуулна.
 
-4. **Authentication → Emails → SMTP Settings.** Өөрийн SMTP-г (жишээ нь Resend, Mailgun) заавал тохируулна.
-   Supabase-ийн анхдагч SMTP нь цагт хэдхэн имэйл илгээдэг. Мөн зөвхөн төслийн багийн гишүүдийн хаяг руу илгээдэг тул багшид урилга хүрэхгүй.
+**Имэйл ба SMTP.** Supabase-ийн анхдагч SMTP-д хоёр хязгаарлалт бий:
+- Цагт 2 имэйл, зөвхөн төслийн багийн гишүүдийн хаяг руу илгээнэ. Бусад фитнес, багшид имэйл хүрэхгүй.
+- Үнэгүй багцад өөрийн SMTP-гүй бол имэйл загварыг өөрчлөх боломжгүй. Иймд имэйлүүд англиар очно.
+
+Жинхэнэ хэрэглэгчидтэй ажиллахын өмнө:
+1. **Authentication → Emails → SMTP Settings** хэсэгт өөрийн SMTP-г (Resend, Mailgun гэх мэт) тохируулна.
+2. `pnpm cloud:auth`-ийг дахин ажиллуулна. SMTP тохируулагдсан бол монгол загварууд (`supabase/templates/`) автоматаар орно.
+3. **Authentication → Rate Limits** хэсэгт имэйлийн хязгаарыг нэмэгдүүлнэ.
+
+Апп анхдагч англи загвартай ч ажиллана:
+- Бүртгэл баталгаажуулах болон нууц үг сэргээх холбоос `/auth/confirm?code=…` руу очно.
+- Багшийн урилга `/auth/callback` руу очно.
+- Анхдагч загвар ашиглаж байгаа үед бүртгүүлсэн эсвэл нууц үг сэргээх хүсэлт илгээсэн **ижил хөтөч** дээр холбоосыг нээх шаардлагатай. Өөр төхөөрөмж дээр нээвэл имэйл баталгаажна, гэхдээ хэрэглэгч өөрөө нэвтэрнэ. Монгол загварт ийм хязгаарлалт байхгүй.
 
 ## 4. Платформын админ үүсгэх
 
@@ -73,4 +80,4 @@ pnpm dev:cloud     # http://localhost:3000, гэхдээ cloud Supabase-тэй
 
 - `SUPABASE_SECRET_KEY` нь RLS-ийг тойрдог. Browser, git, чат руу хэзээ ч бүү гарга.
 - Cloud түлхүүрийг `.env.local`-д бүү хий. `pnpm dev` локал Supabase-тэй ажилласаар байх ёстой.
-- Vercel-д deploy хийх заавар 5-р үе шатанд README-д нэмэгдэнэ.
+- Vercel-д deploy хийх заавар: README.md-ийн "Deploy" хэсэг.

@@ -139,8 +139,8 @@ Seed зөвхөн локал Supabase дээр ажиллана.
 ## Deploy (Vercel + Supabase Cloud)
 
 1. **Supabase Cloud.** Төсөл үүсгээд [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md)-ийн алхмыг дагана:
-   - `.env.cloud.local`-ийг бөглөөд `pnpm cloud:link`, `pnpm cloud:push` ажиллуулна.
-   - Auth тохиргоо: Site URL, Redirect URLs, монгол имэйл загварууд, **өөрийн SMTP**.
+   - `.env.cloud.local`-ийг бөглөөд `pnpm cloud:link`, `pnpm cloud:push`, `pnpm cloud:auth` ажиллуулна.
+   - **Өөрийн SMTP** тохируулаад `pnpm cloud:auth`-ийг дахин ажиллуулна. Ингэснээр монгол имэйл загварууд орно.
    - Бүс: Seoul (`ap-northeast-2`) эсвэл Tokyo. Хамгийн ойр нь эдгээр.
 2. **Vercel.**
    - GitHub repo-гоо импортлоно. Framework: Next.js, Build: `pnpm build`.
@@ -149,8 +149,8 @@ Seed зөвхөн локал Supabase дээр ажиллана.
      `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`,
      `NEXT_PUBLIC_SITE_URL` (жишээ нь `https://app.example.mn`), `PLATFORM_BANK_NAME`, `PLATFORM_BANK_ACCOUNT`,
      `PLATFORM_BANK_ACCOUNT_HOLDER`, `PLATFORM_SUPPORT_PHONE`.
-3. **Домэйн.** Vercel дээр домэйнээ холбоод, Supabase *Authentication → URL Configuration* дээр Site URL-ыг
-   `https://<домэйн>`, Redirect URLs-д `https://<домэйн>/**` болгоно.
+3. **Домэйн.** Vercel дээр домэйнээ холбоод, `.env.cloud.local`-ийн `NEXT_PUBLIC_SITE_URL`-ийг `https://<домэйн>` болгож
+   `pnpm cloud:auth` ажиллуулна. Site URL болон redirect URL-ууд шинэчлэгдэнэ.
 4. **Анхны админ.** `pnpm cloud:admin admin@<домэйн> "<хүчтэй нууц үг>"`.
 5. **Шинэ хувилбар бүрт.** Шинэ migration нэмэгдсэн бол `pnpm cloud:push`-ийг deploy-оос өмнө ажиллуулна.
 
@@ -162,7 +162,8 @@ Seed зөвхөн локал Supabase дээр ажиллана.
 - **Docker "unable to start".** Docker Desktop-ийг нээж лицензийн нөхцөлийг зөвшөөрнө. WSL2 асаалттай эсэхийг шалгана.
 - **Имэйл ирэхгүй (локал).** Бүх имэйл Mailpit-д (http://127.0.0.1:54324) очдог.
 - **`pnpm db:reset`-ийн дараа нэвтэрсэн хэвээр харагдах.** Хуучин session автоматаар цэвэрлэгдэж /login руу шилжинэ.
-- **Cloud дээр урилгын имэйл ирэхгүй.** Supabase-ийн анхдагч SMTP нь зөвхөн багийн гишүүдэд илгээдэг. Өөрийн SMTP тохируулна.
+- **Cloud дээр урилгын имэйл ирэхгүй.** Supabase-ийн анхдагч SMTP нь зөвхөн багийн гишүүдэд цагт 2 имэйл илгээдэг. Өөрийн SMTP тохируулна.
+- **Cloud-ийн имэйл англиар ирнэ.** Үнэгүй багцад өөрийн SMTP-гүй бол загвар өөрчлөх боломжгүй. SMTP тохируулаад `pnpm cloud:auth` ажиллуулна.
 
 ## Энэ шатанд ороогүй
 

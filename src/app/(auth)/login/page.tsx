@@ -6,8 +6,13 @@ import { LoginForm } from "@/features/auth/components/login-form";
 
 export const metadata: Metadata = { title: "Нэвтрэх" };
 
-const ERRORS: Record<string, string> = {
-  link: "Холбоосны хугацаа дууссан эсвэл буруу байна. Дахин оролдоно уу.",
+const ERRORS: Record<string, { text: string; variant: "danger" | "success" | "info" }> = {
+  link: { text: "Холбоосны хугацаа дууссан эсвэл буруу байна. Дахин оролдоно уу.", variant: "danger" },
+  confirmed: { text: "Имэйл хаяг баталгаажлаа. Имэйл, нууц үгээрээ нэвтэрнэ үү.", variant: "success" },
+  recovery_device: {
+    text: "Нууц үг сэргээх холбоосыг хүсэлт илгээсэн хөтөч дээрээ нээнэ үү. Эсвэл хүсэлтээ дахин илгээнэ үү.",
+    variant: "info",
+  },
 };
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -23,8 +28,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (
-          <Alert variant="danger">
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant={error.variant}>
+            <AlertDescription>{error.text}</AlertDescription>
           </Alert>
         )}
         <LoginForm next={next} />

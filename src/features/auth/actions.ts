@@ -71,7 +71,8 @@ export async function registerGym(formData: FormData): Promise<ActionResult> {
     email: input.email,
     password: input.password,
     options: {
-      emailRedirectTo: `${publicEnv.siteUrl}/dashboard`,
+      // Supabase-ийн анхдагч загвар (өөрийн SMTP-гүй үед) ?code=-оор энд буцна; монгол загвар token_hash ашиглана.
+      emailRedirectTo: `${publicEnv.siteUrl}/auth/confirm?next=/dashboard`,
       data: {
         signup_type: "gym_owner",
         full_name: input.managerName,
@@ -135,7 +136,7 @@ export async function requestPasswordReset(input: ForgotPasswordInput): Promise<
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${publicEnv.siteUrl}/set-password`,
+    redirectTo: `${publicEnv.siteUrl}/auth/confirm?next=/set-password`,
   });
   if (error && error.code?.startsWith("over_")) return fail(authErrorMessage(error));
 
