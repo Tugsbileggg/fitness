@@ -100,12 +100,8 @@ async function seedGym(supabase: AdminClient, gym: SeedGym, plans: Map<string, s
   if (gym.subscription.kind === "active") {
     await supabase
       .from("gym_subscriptions")
-      .update({
-        trial_ends_at: addDaysISO(today, -60),
-        paid_until: addDaysISO(today, gym.subscription.paidDaysLeft),
-        platform_plan_id: plans.get(gym.subscription.plan) ?? null,
-        verified_at: new Date().toISOString(),
-      })
+      // 2 сарын өмнө бүртгүүлсэн; төлбөрүүдийг main() доор админы эрхээр RPC-ээр бүртгэнэ.
+      .update({ trial_ends_at: addDaysISO(today, -60), verified_at: new Date().toISOString() })
       .eq("gym_id", gymId)
       .throwOnError();
   } else {
@@ -183,6 +179,26 @@ const GYM_PLANS = [
   { name: "6 сар", duration_months: 6, price: 390000 },
   { name: "1 жил", duration_months: 12, price: 720000 },
 ];
+
+/**
+ * Платформын төлбөрийг админаар (admin_record_platform_payment RPC) бүртгэнэ:
+ * 45 хоногийн өмнө 1 сар, дараа нь хэдэн хоног хоцорч дахин 1 сар → эрх өнөөдрөөс paidDaysLeft хоног.
+ */
+async function seedPlatformPayments(admin: Payer, gymId: string, planId: string, today: string, paidDaysLeft: number) {
+  const secondPaidOn = addMonthsISO(addDaysISO(today, paidDaysLeft), -1);
+  for (const paidOn of [addDaysISO(today, -45), secondPaidOn]) {
+    const { error } = await admin.rpc("admin_record_platform_payment", {
+      p_gym_id: gymId,
+      p_plan_id: planId,
+      p_months: 1,
+      p_amount: 99000,
+      p_paid_on: paidOn,
+      p_method: "bank_transfer",
+      p_note: "Дансаар шилжүүлсэн",
+    });
+    if (error) throw new Error(`admin_record_platform_payment: ${error.message}`);
+  }
+}
 
 async function seedPlans(supabase: AdminClient, gymId: string) {
   const { data } = await supabase
@@ -313,10 +329,14 @@ async function main() {
   const { plans } = await seedPlatform(supabase);
   console.log(`✓ Платформын админ ба ${plans.size} тариф`);
 
+  const admin = await signedInClient("admin@demo.test");
   const trainerLogins: string[] = [];
   for (const [index, gym] of GYMS.entries()) {
     const rng = createRng(1000 + index);
     const { gymId, managerId } = await seedGym(supabase, gym, plans, today);
+    if (gym.subscription.kind === "active") {
+      await seedPlatformPayments(admin, gymId, plans.get(gym.subscription.plan)!, today, gym.subscription.paidDaysLeft);
+    }
     const trainers = await seedTrainers(supabase, index, gymId);
     const clientIds = await seedClients(supabase, rng, gymId, managerId, trainers.map((t) => t.id));
     const gymPlans = await seedPlans(supabase, gymId);

@@ -1,35 +1,85 @@
 # Фитнес Хяналт
 
 Монголын жижиг фитнесүүдэд зориулсан бүртгэл, хяналтын multi-tenant SaaS платформ (MVP).
-Бүтээх төлөвлөгөө: [docs/PLAN.md](docs/PLAN.md).
+Фитнес бүр өөрөө бүртгүүлж, багш, үйлчлүүлэгч, эрхийн багц, төлбөрөө бүртгэнэ. Эрх нь дуусах гэж буй
+үйлчлүүлэгчдээ хяналтын самбараас хянана. Платформ фитнесүүдээс сарын ашиглалтын төлбөр авна.
 
-> Энэ README-г үе шат бүрт шинэчилнэ. Deploy-ийн бүрэн заавар 5-р үе шатанд нэмэгдэнэ.
+Төлөвлөгөө: [docs/PLAN.md](docs/PLAN.md) · Supabase Cloud холболт: [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md)
 
-## Шаардлагатай программууд
+## Боломжууд
 
-| Программ | Хувилбар | Тайлбар |
+| Дүр | Юу хийх вэ |
+|---|---|
+| **Фитнесийн менежер** | Хяналтын самбар (дуусах гэж буй / дууссан, орлого), үйлчлүүлэгч, багш (имэйлээр урих), эрхийн багц, төлбөр (хөнгөлөлт, сунгалт, хүчингүй болгох), тохиргоо, платформын эрх |
+| **Багш** | Үйлчлүүлэгч харах, нэмэх, засах, төлбөр бүртгэх, "Мэдэгдсэн" тэмдэглэх. Орлого, төлбөрийн түүх, багц, тохиргоо **харахгүй** |
+| **Платформын админ** | Бүх фитнесийн төлөв, үйлчлүүлэгчийн *тоо*, баталгаажуулах, түр зогсоох, туршилт сунгах, платформын төлбөр бүртгэх, тарифууд, орлого (MRR) |
+
+Үйлчлүүлэгч системд нэвтрэхгүй. Бүх интерфэйс монгол хэлээр, утсан дээр бүрэн ажиллана.
+
+## Технологи
+
+| | Хувилбар | Тайлбар |
 |---|---|---|
-| Node.js | 24 LTS (≥22) | https://nodejs.org |
-| pnpm | 11 | `corepack enable` эсвэл `npm i -g pnpm` |
-| Docker Desktop | сүүлийн хувилбар | Локал Supabase-д хэрэгтэй (Windows дээр WSL2 идэвхжүүлнэ) |
-
-Supabase CLI нь төслийн devDependency тул тусад нь суулгах шаардлагагүй (`pnpm exec supabase ...`).
+| Next.js (App Router, Turbopack) | 16.3 | `proxy.ts` (хуучнаар middleware), Server Actions |
+| React | 19.3 | |
+| TypeScript | 6.0.3 | 7.0 гарсан ч JS API-гүй тул `typescript-eslint` дэмжихгүй байна. Дэмжлэг гармагц шилжинэ |
+| Tailwind CSS + shadcn/ui (Radix) | 4.3 / 4.21 | |
+| Supabase | CLI 2.117, Postgres 17 | Auth, Storage, Row Level Security |
+| Zod + react-hook-form | 4.6 / 7.88 | Client, server хоёулаа ижил схем |
+| Vitest | 5.0 | Unit + өгөгдлийн сан/RLS тест |
+| ESLint | 9 | Next-ийн plugin-ууд (react, import, jsx-a11y) ESLint 10-ыг хараахан дэмжээгүй |
 
 ## Локал орчинд ажиллуулах
 
+### Шаардлагатай программууд
+
+- **Node.js 24 LTS** (≥22): https://nodejs.org
+- **pnpm 11**: `npm i -g pnpm`
+- **Docker Desktop** (Windows дээр WSL2-той). Анх асаахад лицензийн нөхцөлийг зөвшөөрнө.
+
+Supabase CLI нь төслийн devDependency тул тусад нь суулгах шаардлагагүй.
+
+### Алхмууд
+
 ```bash
 pnpm install
-cp .env.example .env.local        # Windows PowerShell: Copy-Item .env.example .env.local
-pnpm db:start                     # Docker дээр Postgres, Auth, Studio, Mailpit асна (анх удаа удаан)
-pnpm db:status                    # Publishable/Secret key-г .env.local-д хуулна
+cp .env.example .env.local        # PowerShell: Copy-Item .env.example .env.local
+pnpm db:start                     # Docker дээр Supabase асна (анх удаа image татахад 5–10 минут)
+pnpm db:status                    # "Publishable key", "Secret key"-г .env.local-д хуулна
+pnpm db:reset                     # бүх migration-ийг ажиллуулна
+pnpm db:seed                      # туршилтын өгөгдөл
 pnpm dev                          # http://localhost:3000
 ```
 
-Локал хаягууд:
+| Хаяг | Юу вэ |
+|---|---|
+| http://localhost:3000 | Апп |
+| http://127.0.0.1:54323 | Supabase Studio (өгөгдлийн сан) |
+| http://127.0.0.1:54324 | Mailpit: илгээсэн бүх имэйл (баталгаажуулалт, урилга, нууц үг) энд очно |
 
-- Апп: http://localhost:3000
-- Supabase Studio (өгөгдлийн сан харах): http://127.0.0.1:54323
-- Mailpit (илгээсэн имэйлүүд): http://127.0.0.1:54324
+### Туршилтын хэрэглэгчид
+
+Бүгдийн нууц үг: **`Demo12345`**
+
+| Имэйл | Дүр |
+|---|---|
+| `admin@demo.test` | Платформын админ |
+| `manager1@demo.test` | Хүчит фитнес: менежер (платформын эрх идэвхтэй, 20 хоног үлдсэн) |
+| `manager2@demo.test` | Эрч хүч спорт клуб: менежер (туршилт дуусахад 4 хоног → анхааруулга гарна) |
+| `trainer1.1@demo.test`, `trainer1.2@demo.test` | Хүчит фитнесийн багш нар |
+| `trainer2.1@demo.test`, `trainer2.2@demo.test` | Эрч хүч спорт клубын багш нар |
+
+Фитнес бүрт: 3 багш (2 нь нэвтрэх эрхтэй), 4 эрхийн багц, 40 үйлчлүүлэгч. Үйлчлүүлэгчдийн төлөв:
+- 20 идэвхтэй (энэ сарын шинэ ба сунгалт, хөнгөлөлттэй төлбөрүүд орсон).
+- 8 нь 0–7 хоногийн дотор дуусна.
+- 8 нь 1–28 хоногийн өмнө дууссан.
+- 4 нь эрхгүй.
+- Заримд нь "Мэдэгдсэн" тэмдэглэлтэй.
+
+Бүх огноо ажиллуулсан өдрөөс харьцангуй тооцоологдоно. Төлбөрүүд бодит `record_payment` RPC-ээр бүртгэгдэнэ.
+Seed зөвхөн локал Supabase дээр ажиллана.
+
+**Read-only горимыг туршихын тулд** админаар нэвтэрч фитнесийг "Түр зогсоох" хийгээд, менежерээр нэвтэрнэ.
 
 ## Скриптүүд
 
@@ -37,35 +87,84 @@ pnpm dev                          # http://localhost:3000
 |---|---|
 | `pnpm dev` | Хөгжүүлэлтийн сервер |
 | `pnpm build` / `pnpm start` | Production build ба ажиллуулах |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | TypeScript шалгалт |
-| `pnpm test` | Unit тестүүд (Docker шаардлагагүй) |
-| `pnpm test:db` | Өгөгдлийн сан ба RLS тестүүд (локал Supabase асаалттай байх ёстой) |
+| `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
+| `pnpm test` | Unit тест (Docker шаардлагагүй) |
+| `pnpm test:db` | Өгөгдлийн сан ба RLS тест (локал Supabase асаалттай байх ёстой) |
 | `pnpm check` | lint + typecheck + unit тест |
-| `pnpm db:start` / `pnpm db:stop` | Локал Supabase асаах/унтраах |
-| `pnpm db:reset` | Өгөгдлийн санг цэвэрлэж, бүх migration-ийг дахин ажиллуулах |
-| `pnpm db:types` | Өгөгдлийн сангаас TypeScript төрлүүд үүсгэх |
-| `pnpm db:seed` | Туршилтын өгөгдөл (зөвхөн локал). Бүх хэрэглэгчийн нууц үг `Demo12345` |
+| `pnpm db:start` / `db:stop` / `db:status` | Локал Supabase |
+| `pnpm db:reset` | Өгөгдлийн санг цэвэрлэж migration-уудыг дахин ажиллуулах |
+| `pnpm db:types` | DB-ээс TypeScript төрөл үүсгэх (`src/types/database.types.ts`) |
+| `pnpm db:seed` | Туршилтын өгөгдөл (зөвхөн локал) |
 | `pnpm admin:create <имэйл> "<нууц үг>"` | Платформын админ үүсгэх |
 | `pnpm cloud:*`, `pnpm dev:cloud` | Supabase Cloud-тай ажиллах: [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md) |
 
-### Туршилтын хэрэглэгчид (`pnpm db:reset && pnpm db:seed`)
+## Бизнесийн дүрэм
 
-| Имэйл | Дүр |
-|---|---|
-| `admin@demo.test` | Платформын админ |
-| `manager1@demo.test` | Хүчит фитнес: менежер (платформын эрх идэвхтэй) |
-| `manager2@demo.test` | Эрч хүч спорт клуб: менежер (туршилт дуусахад 4 хоног үлдсэн) |
-| `trainer1.1@demo.test`, `trainer1.2@demo.test` | Хүчит фитнесийн багш нар |
-| `trainer2.1@demo.test`, `trainer2.2@demo.test` | Эрч хүч спорт клубын багш нар |
+- **Эрхийн хугацаа.** 2026.09.19-нд 1 сар авбал 2026.10.19-ний өдрийг дуустал хүчинтэй.
+  - Эрх хүчинтэй байхад сунгавал одоогийн дуусах огнооноос нэмнэ: 10.20-оос 11.19 хүртэл.
+  - Эрх дууссан бол төлсөн өдрөөс эхэлнэ.
+  - Сарын сүүлийн өдөр тасална: 01.31 + 1 сар = 02.28.
+  - Тооцоо DB-д (`app.compute_period`) хийгддэг. Маягтын урьдчилсан харагдац (`src/lib/membership.ts`) ижил тест кейсүүдээр шалгагддаг.
+- **Хөнгөлөлт.** Дүнгээр (үнээс хэтрэхгүй) эсвэл хувиар (1–100, ₮-өөр бүхэлтгэнэ).
+- **Үйлчлүүлэгчийн төлөв:**
+  - *идэвхтэй*: эрх хүчинтэй.
+  - *дуусах гэж буй*: 0–N хоног үлдсэн. N-ийг фитнес тохируулна, анхдагч 7.
+  - *дууссан*.
+  - *эрхгүй*.
+- **Төлбөрийг хүчингүй болгох.** Зөвхөн хамгийн сүүлийн төлбөрийг (менежер, шалтгаантай) хүчингүй болгоно. Эрх өмнөх төлбөрийнх рүү буцна. Төлбөр устахгүй.
+- **Платформын эрх.** Бүртгүүлмэгц 14 хоногийн туршилт эхэлнэ.
+  - Төлөв: `trial` → (админ төлбөр бүртгэхэд) `active` → (хугацаа дуусвал) `past_due`.
+  - Админ гараар түр зогсоовол `suspended`.
+  - Төлөв огнооноос тооцоологддог тул cron шаардлагагүй.
+- **Read-only.** `past_due` болон `suspended` фитнес өгөгдлөө харна, гэхдээ бичих боломжгүй. Үүнийг DB түвшинд RLS хэрэгжүүлдэг.
+- **Анхааруулга.** Платформын эрх дуусахад 5 хоног үлдсэн үед менежерт анхааруулга гарна.
+- **Устгах.** Бүгд soft delete: `deleted_at`, `voided_at`, `is_active`. DELETE эрх хэнд ч байхгүй.
 
-Фитнес бүрт 3 багш (2 нь нэвтрэх эрхтэй) болон 40 үйлчлүүлэгч бий.
+## Аюулгүй байдал (multi-tenant)
 
-## Технологи
+- Бүх хүснэгтэд `gym_id` бий. Тусгаарлалтыг **Postgres RLS** хамгаална. Proxy, layout, Server Action-ууд нэмэлт давхарга.
+- **Нийлмэл FK.** Хүснэгтүүдийг `(gym_id, client_id) → clients(gym_id, id)` хэлбэрээр холбодог тул өөр фитнесийн мөрийг өөрийн мөрөнд холбох боломжгүй. Мөрийн `gym_id`-г өөрчлөх боломжгүй.
+- **Эмзэг өгөгдлийг зөвхөн RPC бичнэ.** Эрхийн хугацаа (`client_memberships`), платформын эрх (`gym_subscriptions`), төлбөрүүд зөвхөн `SECURITY DEFINER` RPC-ээр бичигдэнэ. Хэрэглэгч эдгээрийг шууд засаж чадахгүй.
+- **Баганын түвшний эрх.** `is_platform_admin`, `notified_by`, `trainers.user_id` зэргийг хэрэглэгч өөрөө тохируулж чадахгүй.
+- **Багш** `payments` хүснэгтийг уншихгүй. API-аар ч орлогыг нийлбэрлэх боломжгүй.
+- **Админ** үйлчлүүлэгчийн нэр, утсыг харахгүй, зөвхөн тоог харна.
+- **`SUPABASE_SECRET_KEY`** зөвхөн сервер талд (`src/lib/supabase/admin.ts`, `server-only`) хэрэглэгдэнэ: багш урих, бүртгэлийн үеийн лого.
+- **Тест.** `tests/db/`-д 50 гаруй RLS тест бий:
+  - Tenant хооронд унших, бичих.
+  - FK хуурах, эрх нэмэгдүүлэх оролдлого.
+  - Дүрийн ялгаа.
+  - Read-only горим.
+  - Админы RPC.
 
-Next.js 16 (App Router), React 19, TypeScript 6, Tailwind CSS 4, shadcn/ui (Radix),
-Supabase (Postgres 17, Auth, Storage, RLS), Zod 4, Vitest 5.
+## Deploy (Vercel + Supabase Cloud)
 
-TypeScript 7.0 гарсан ч JS compiler API-гүй тул `typescript-eslint` (улмаар `eslint-config-next`)
-дэмжихгүй байна. Иймд 6.0.3-ыг ашиглаж, дэмжлэг гармагц шилжинэ. ESLint мөн адил шалтгаанаар 9.x дээр байна
-(`eslint-plugin-react`, `-import`, `-jsx-a11y` нь ESLint 10-ыг хараахан дэмжээгүй).
+1. **Supabase Cloud.** Төсөл үүсгээд [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md)-ийн алхмыг дагана:
+   - `.env.cloud.local`-ийг бөглөөд `pnpm cloud:link`, `pnpm cloud:push` ажиллуулна.
+   - Auth тохиргоо: Site URL, Redirect URLs, монгол имэйл загварууд, **өөрийн SMTP**.
+   - Бүс: Seoul (`ap-northeast-2`) эсвэл Tokyo. Хамгийн ойр нь эдгээр.
+2. **Vercel.**
+   - GitHub repo-гоо импортлоно. Framework: Next.js, Build: `pnpm build`.
+   - *Settings → Functions → Region*: `icn1` (Seoul), өгөгдлийн сантай ойр байхаар.
+   - *Environment Variables*:
+     `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`,
+     `NEXT_PUBLIC_SITE_URL` (жишээ нь `https://app.example.mn`), `PLATFORM_BANK_NAME`, `PLATFORM_BANK_ACCOUNT`,
+     `PLATFORM_BANK_ACCOUNT_HOLDER`, `PLATFORM_SUPPORT_PHONE`.
+3. **Домэйн.** Vercel дээр домэйнээ холбоод, Supabase *Authentication → URL Configuration* дээр Site URL-ыг
+   `https://<домэйн>`, Redirect URLs-д `https://<домэйн>/**` болгоно.
+4. **Анхны админ.** `pnpm cloud:admin admin@<домэйн> "<хүчтэй нууц үг>"`.
+5. **Шинэ хувилбар бүрт.** Шинэ migration нэмэгдсэн бол `pnpm cloud:push`-ийг deploy-оос өмнө ажиллуулна.
+
+> **Санамж:** Үйлчлүүлэгчийн хувийн мэдээлэл (нэр, утас, төрсөн он) гадаадын сервер дээр хадгалагдана.
+> Хувь хүний мэдээлэл хамгаалах тухай хуулийн шаардлагыг хууль зүйн талаас шалгуулахыг зөвлөж байна.
+
+## Түгээмэл асуудал
+
+- **Docker "unable to start".** Docker Desktop-ийг нээж лицензийн нөхцөлийг зөвшөөрнө. WSL2 асаалттай эсэхийг шалгана.
+- **Имэйл ирэхгүй (локал).** Бүх имэйл Mailpit-д (http://127.0.0.1:54324) очдог.
+- **`pnpm db:reset`-ийн дараа нэвтэрсэн хэвээр харагдах.** Хуучин session автоматаар цэвэрлэгдэж /login руу шилжинэ.
+- **Cloud дээр урилгын имэйл ирэхгүй.** Supabase-ийн анхдагч SMTP нь зөвхөн багийн гишүүдэд илгээдэг. Өөрийн SMTP тохируулна.
+
+## Энэ шатанд ороогүй
+
+Мобайл апп, QPay интеграц (`payment_method` enum-д `qpay` утга бэлэн), SMS/Messenger сануулга, ирц бүртгэл,
+үйлчлүүлэгчийн нэвтрэлт.

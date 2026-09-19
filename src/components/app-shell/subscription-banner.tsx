@@ -1,4 +1,5 @@
 import { AlertTriangleIcon, LockIcon } from "lucide-react";
+import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { GymContext } from "@/lib/auth/context";
 import { formatDate } from "@/lib/dates";
@@ -39,6 +40,12 @@ export function SubscriptionBanner({ gym }: { gym: GymContext }) {
             Эрх {formatDate(gym.accessEndsOn)}-нд дууссан тул систем зөвхөн харах горимд шилжлээ. Өгөгдөл тань
             хадгалагдсан. {gym.isManager ? "Төлбөрөө шилжүүлсний дараа бүрэн ажиллана." : "Менежерт мэдэгдэнэ үү."}
             {phone}
+            {gym.isManager && (
+              <>
+                {" "}
+                <Link href="/billing">Төлбөрийн мэдээлэл</Link>
+              </>
+            )}
           </AlertDescription>
         </Alert>
       </div>
@@ -57,7 +64,7 @@ export function SubscriptionBanner({ gym }: { gym: GymContext }) {
             {what} {when} ({formatDate(gym.accessEndsOn)})
           </AlertTitle>
           <AlertDescription>
-            Хугацаа дуусвал систем зөвхөн харах горимд шилжинэ.
+            Хугацаа дуусвал систем зөвхөн харах горимд шилжинэ. <Link href="/billing">Дэлгэрэнгүй</Link>.
             {contact.bankAccount &&
               ` Төлбөрөө ${contact.bankName ?? ""} ${contact.bankAccount}${
                 contact.bankAccountHolder ? ` (${contact.bankAccountHolder})` : ""

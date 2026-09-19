@@ -536,6 +536,95 @@ export type Database = {
           },
         ]
       }
+      platform_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          gym_id: string
+          id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          months: number
+          note: string | null
+          paid_on: string
+          period_end: string
+          period_start: string
+          plan_name: string
+          platform_plan_id: string
+          recorded_by: string
+          seq: number
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          gym_id: string
+          id?: string
+          method: Database["public"]["Enums"]["payment_method"]
+          months: number
+          note?: string | null
+          paid_on: string
+          period_end: string
+          period_start: string
+          plan_name: string
+          platform_plan_id: string
+          recorded_by: string
+          seq?: never
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          gym_id?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          months?: number
+          note?: string | null
+          paid_on?: string
+          period_end?: string
+          period_start?: string
+          plan_name?: string
+          platform_plan_id?: string
+          recorded_by?: string
+          seq?: never
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_payments_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_payments_platform_plan_id_fkey"
+            columns: ["platform_plan_id"]
+            isOneToOne: false
+            referencedRelation: "platform_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_payments_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "platform_payments_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_plans: {
         Row: {
           created_at: string
@@ -710,6 +799,80 @@ export type Database = {
       }
     }
     Functions: {
+      admin_extend_trial: {
+        Args: { p_days: number; p_gym_id: string }
+        Returns: string
+      }
+      admin_gym_overview: {
+        Args: never
+        Returns: {
+          access_ends_on: string
+          active_client_count: number
+          address: string
+          client_count: number
+          created_at: string
+          days_left: number
+          gym_id: string
+          last_payment_on: string
+          manager_email: string
+          manager_name: string
+          name: string
+          paid_until: string
+          phone: string
+          plan_id: string
+          plan_max_clients: number
+          plan_monthly_price: number
+          plan_name: string
+          staff_count: number
+          status: Database["public"]["Enums"]["gym_subscription_status"]
+          suspended_at: string
+          suspended_reason: string
+          trial_ends_at: string
+          verified_at: string
+        }[]
+      }
+      admin_platform_summary: {
+        Args: never
+        Returns: {
+          active_count: number
+          expiring_soon_count: number
+          gym_count: number
+          month_payment_count: number
+          month_revenue: number
+          mrr: number
+          past_due_count: number
+          suspended_count: number
+          trial_count: number
+        }[]
+      }
+      admin_record_platform_payment: {
+        Args: {
+          p_amount: number
+          p_gym_id: string
+          p_method: Database["public"]["Enums"]["payment_method"]
+          p_months: number
+          p_note?: string
+          p_paid_on: string
+          p_plan_id: string
+        }
+        Returns: {
+          payment_id: string
+          period_end: string
+          period_start: string
+        }[]
+      }
+      admin_set_gym_suspended: {
+        Args: { p_gym_id: string; p_reason?: string; p_suspended: boolean }
+        Returns: undefined
+      }
+      admin_set_gym_verified: {
+        Args: { p_gym_id: string; p_verified: boolean }
+        Returns: undefined
+      }
+      admin_void_platform_payment: {
+        Args: { p_payment_id: string; p_reason: string }
+        Returns: undefined
+      }
       dashboard_summary: {
         Args: { p_gym_id: string }
         Returns: {
@@ -740,6 +903,15 @@ export type Database = {
           today: string
           trial_ends_at: string
           user_id: string
+        }[]
+      }
+      gym_usage: {
+        Args: { p_gym_id: string }
+        Returns: {
+          client_count: number
+          max_clients: number
+          monthly_price: number
+          plan_name: string
         }[]
       }
       record_payment: {

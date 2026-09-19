@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
+import { ChevronsUpDownIcon, CircleUserIcon, LogOutIcon } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,12 @@ export function UserMenu({ fullName, roleLabel }: { fullName: string; roleLabel:
           <div className="text-xs text-muted-foreground">{roleLabel}</div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/account">
+            <CircleUserIcon />
+            Миний бүртгэл
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => {
             void signOut();

@@ -1,4 +1,6 @@
 import {
+  CircleUserIcon,
+  CreditCardIcon,
   DumbbellIcon,
   LayoutDashboardIcon,
   type LucideIcon,
@@ -62,6 +64,18 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Тохиргоо",
     icon: SettingsIcon,
     roles: ["manager"],
+  },
+  {
+    href: "/billing",
+    label: "Платформын эрх",
+    icon: CreditCardIcon,
+    roles: ["manager"],
+  },
+  {
+    href: "/account",
+    label: "Миний бүртгэл",
+    icon: CircleUserIcon,
+    roles: ["manager", "trainer"],
   },
 ];
 

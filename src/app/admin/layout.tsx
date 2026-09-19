@@ -2,6 +2,7 @@ import { LogOutIcon } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
+import { AdminNav } from "@/features/admin/components/admin-nav";
 import { signOut } from "@/features/auth/actions";
 import { requireAdmin } from "@/lib/auth/context";
 
@@ -25,7 +26,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 lg:px-8">
+        <AdminNav />
+        {children}
+      </main>
       <Toaster />
     </div>
   );
