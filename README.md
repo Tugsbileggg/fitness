@@ -4,7 +4,7 @@
 Фитнес бүр өөрөө бүртгүүлж, багш, үйлчлүүлэгч, эрхийн багц, төлбөрөө бүртгэнэ. Эрх нь дуусах гэж буй
 үйлчлүүлэгчдээ хяналтын самбараас хянана. Платформ фитнесүүдээс сарын ашиглалтын төлбөр авна.
 
-Төлөвлөгөө: [docs/PLAN.md](docs/PLAN.md) · Supabase Cloud холболт: [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md)
+Төлөвлөгөө: [docs/PLAN.md](docs/PLAN.md) · Supabase Cloud: [docs/SUPABASE_CLOUD.md](docs/SUPABASE_CLOUD.md) · Одоогийн байдал: [docs/HANDOFF.md](docs/HANDOFF.md)
 
 ## Боломжууд
 
