@@ -146,10 +146,12 @@ Seed зөвхөн локал Supabase дээр ажиллана.
 2. **Vercel.**
    - GitHub repo-гоо импортлоно. Framework: Next.js, Build: `pnpm build`.
    - *Settings → Functions → Region*: `icn1` (Seoul), өгөгдлийн сантай ойр байхаар.
-   - *Environment Variables*:
+   - *Environment Variables* — найман хувьсагч, яг эдгээр нэрээр:
      `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`,
      `NEXT_PUBLIC_SITE_URL` (жишээ нь `https://app.example.mn`), `PLATFORM_BANK_NAME`, `PLATFORM_BANK_ACCOUNT`,
      `PLATFORM_BANK_ACCOUNT_HOLDER`, `PLATFORM_SUPPORT_PHONE`.
+   - Vercel-ийн Supabase integration нь эдгээрийг **тавьж өгөхгүй**: тэр хуучин нэрсийг
+     (`…_ANON_KEY`, `…_SERVICE_ROLE_KEY`) ашигладаг. Гараар нэмнэ.
 3. **Домэйн.** Vercel дээр домэйнээ холбоод, `.env.cloud.local`-ийн `NEXT_PUBLIC_SITE_URL`-ийг `https://<домэйн>` болгож
    `pnpm cloud:auth` ажиллуулна. Site URL болон redirect URL-ууд шинэчлэгдэнэ.
 4. **Анхны админ.** `pnpm cloud:admin admin@<домэйн> "<хүчтэй нууц үг>"`.
@@ -168,11 +170,20 @@ Seed зөвхөн локал Supabase дээр ажиллана.
 - **Имэйл ирэхгүй (локал).** Бүх имэйл Mailpit-д (http://127.0.0.1:54324) очдог.
 - **`pnpm db:reset`-ийн дараа нэвтэрсэн хэвээр харагдах.** Хуучин session автоматаар цэвэрлэгдэж /login руу шилжинэ.
 - **Cloud дээр урилгын имэйл ирэхгүй.** Supabase-ийн анхдагч SMTP нь зөвхөн багийн гишүүдэд цагт 2 имэйл илгээдэг. Өөрийн SMTP тохируулна.
+- **Vercel дээр бүх хуудас "Internal Server Error".** Орчны хувьсагч дутуу байна. `src/proxy.ts`
+  (middleware) бүх замд ажилладаг тул Supabase-ийн түлхүүр дутвал нүүр хуудас хүртэл унана.
+  Vercel-ийн **Supabase integration нь хуучин нэрсээр** (`NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`) хувьсагч тавьдаг ч энэ төсөл шинэ түлхүүрийн системийг
+  (`sb_publishable_…` / `sb_secret_…`) ашигладаг. Доорх "Deploy" хэсгийн 8 хувьсагчийг **яг тэр нэрээр**
+  нэмээд **дахин deploy хийнэ** — `NEXT_PUBLIC_*` утгууд build-ийн үед кодод шигдэнэ тул зүгээр
+  дахин эхлүүлэхэд хүрэлцэхгүй. Дутсан хувьсагчийн нэрийг Vercel → Deployment → Runtime Logs дотроос
+  монголоор харна.
 - **Cloud-ийн имэйл англиар ирнэ.** Үнэгүй багцад өөрийн SMTP-гүй бол загвар өөрчлөх боломжгүй. SMTP тохируулаад `pnpm cloud:auth` ажиллуулна.
 
 ## Энэ шатанд ороогүй
 
 Мобайл апп, QPay интеграц (`payment_method` enum-д `qpay` утга бэлэн), SMS/Messenger сануулга, ирц бүртгэл,
 үйлчлүүлэгчийн нэвтрэлт.
-#   f i t n e s s  
+#   f i t n e s s 
+ 
  

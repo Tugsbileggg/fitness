@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { publicEnv } from "@/lib/env";
 import type { Database } from "@/types/database.types";
 
 // Нэвтрэх шаардлагатай замууд. Дүрийн нарийн шалгалтыг layout, Server Action, RLS хийнэ;
@@ -27,9 +28,11 @@ function matches(path: string, prefixes: string[]) {
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // publicEnv нь дутуу хувьсагчийг нэрээр нь хэлнэ. Шууд process.env авбал Supabase-ийн ерөнхий
+  // алдаа гарч, proxy бүх замд ажилладаг тул бүх хуудас "Internal Server Error" болдог.
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    publicEnv.supabaseUrl,
+    publicEnv.supabasePublishableKey,
     {
       cookies: {
         getAll() {
