@@ -9,6 +9,16 @@ export function loadEnv() {
   }
 }
 
+/**
+ * Аль өгөгдлийн сан руу бичих гэж байгаа: локал Docker уу, cloud уу.
+ * Скриптүүд буруу сан руу бичихээс сэргийлж, ажиллахынхаа өмнө хэвлэнэ.
+ */
+export function describeTarget() {
+  loadEnv();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  return { url, isLocal: /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?/.test(url) };
+}
+
 export function adminClient() {
   loadEnv();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

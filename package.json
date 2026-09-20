@@ -29,6 +29,7 @@
     "cloud:push:dry": "tsx scripts/cloud.ts push --dry-run",
     "cloud:push": "tsx scripts/cloud.ts push",
     "cloud:auth": "tsx scripts/cloud.ts auth",
+    "cloud:plans": "node --env-file=.env.cloud.local --import tsx scripts/cloud-plans.ts",
     "cloud:admin": "node --env-file=.env.cloud.local --import tsx scripts/make-admin.ts"
   },
   "dependencies": {

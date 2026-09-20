@@ -1,7 +1,7 @@
 // Платформын админ үүсгэх эсвэл одоо байгаа хэрэглэгчийг админ болгох.
 //   pnpm admin:create admin@example.mn "НууцҮг123"
 // Хэрэглэгч байхгүй бол нууц үгээр шинээр үүсгэнэ (имэйл баталгаажсан төлөвтэй).
-import { adminClient, findUserByEmail } from "./lib";
+import { adminClient, describeTarget, findUserByEmail } from "./lib";
 
 async function main() {
   const [email, password] = process.argv.slice(2);
@@ -10,6 +10,8 @@ async function main() {
     process.exit(1);
   }
 
+  // Аль сан руу бичиж байгааг үргэлж харуулна: локал ба cloud хоёрыг андуурахаас сэргийлнэ.
+  console.log(`Өгөгдлийн сан: ${describeTarget().url}`);
   const supabase = adminClient();
   let user = await findUserByEmail(supabase, email);
 

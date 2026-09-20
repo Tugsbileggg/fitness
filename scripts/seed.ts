@@ -5,7 +5,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { addDaysISO, addMonthsISO, todayUB } from "../src/lib/dates";
 import type { Database } from "../src/types/database.types";
-import { adminClient, findUserByEmail, type AdminClient } from "./lib";
+import { adminClient, describeTarget, findUserByEmail, type AdminClient } from "./lib";
+import { PLATFORM_PLANS } from "./platform-plans";
 import { clientNote, createRng, mongolianName, phoneNumber, type Rng, TRAINER_PROFILES } from "./seed-data";
 
 const CLIENTS_PER_GYM = 40;
@@ -44,15 +45,9 @@ const GYMS: SeedGym[] = [
   },
 ];
 
-const PLATFORM_PLANS = [
-  { name: "Эхлэл", description: "Шинээр нээгдсэн жижиг заалуудад", max_clients: 100, monthly_price: 49000, sort_order: 1 },
-  { name: "Стандарт", description: "Ихэнх фитнесүүдэд тохиромжтой", max_clients: 300, monthly_price: 99000, sort_order: 2 },
-  { name: "Про", description: "Олон багштай, том фитнес", max_clients: null, monthly_price: 149000, sort_order: 3 },
-];
-
 function assertLocal() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?/.test(url)) {
+  const { url, isLocal } = describeTarget();
+  if (!isLocal) {
     throw new Error(`Seed зөвхөн локал Supabase дээр ажиллана. Одоогийн URL: ${url}`);
   }
 }
