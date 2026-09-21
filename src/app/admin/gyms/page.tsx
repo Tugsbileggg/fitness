@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { GymList } from "@/features/admin/components/gym-list";
 import { getGymOverview } from "@/features/admin/queries";
 import { SUBSCRIPTION_STATUS } from "@/features/billing/status";
+import { listProfileFlags } from "@/features/directory/queries";
 import type { SubscriptionStatus } from "@/lib/auth/context";
 import { cn } from "@/lib/utils";
 import { Building2Icon } from "lucide-react";
@@ -24,7 +25,7 @@ export default async function AdminGymsPage({ searchParams }: PageProps<"/admin/
   const status = FILTERS.some((f) => f.value === statusParam) ? (statusParam as SubscriptionStatus) : "all";
   const q = typeof qParam === "string" ? qParam.trim().toLowerCase() : "";
 
-  const gyms = await getGymOverview();
+  const [gyms, profiles] = await Promise.all([getGymOverview(), listProfileFlags()]);
   const counts = Object.fromEntries(FILTERS.map((f) => [f.value, f.value === "all" ? gyms.length : gyms.filter((g) => g.status === f.value).length]));
   const rows = gyms.filter(
     (g) =>
@@ -66,7 +67,7 @@ export default async function AdminGymsPage({ searchParams }: PageProps<"/admin/
         <EmptyState icon={Building2Icon} title="Фитнес олдсонгүй" />
       ) : (
         <Card className="p-0">
-          <GymList rows={rows} />
+          <GymList rows={rows} profiles={profiles} />
         </Card>
       )}
     </div>

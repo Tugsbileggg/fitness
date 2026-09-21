@@ -12,6 +12,7 @@ const PROTECTED_PREFIXES = [
   "/plans",
   "/payments",
   "/settings",
+  "/listing",
   "/billing",
   "/account",
   "/admin",

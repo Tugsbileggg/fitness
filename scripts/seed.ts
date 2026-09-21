@@ -5,6 +5,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { addDaysISO, addMonthsISO, todayUB } from "../src/lib/dates";
 import type { Database } from "../src/types/database.types";
+import { CORE_GYM_PROFILES, createDirectoryGym, demoManagerEmail, DIRECTORY_GYMS, upsertDemoProfile } from "./demo-gyms";
 import { adminClient, describeTarget, findUserByEmail, type AdminClient } from "./lib";
 import { PLATFORM_PLANS } from "./platform-plans";
 import { clientNote, createRng, mongolianName, phoneNumber, type Rng, TRAINER_PROFILES } from "./seed-data";
@@ -340,14 +341,21 @@ async function main() {
     const trainer = trainerEmail ? await signedInClient(trainerEmail) : null;
     const paymentCount = await seedPayments(rng, today, clientIds, gymPlans, manager, trainer);
     await seedNotices(rng, gymId, manager);
+    // Нийтийн танилцуулга. "Эрч хүч" (туршилт) нь баталгаажаагүй тул "Фитнес хайх"-д гарахгүй:
+    // менежерийн "хүлээж байна" төлөв ба админы баталгаажуулах урсгалыг туршихад зориулав.
+    await upsertDemoProfile(supabase, gymId, CORE_GYM_PROFILES[gym.key], { contactPhone: gym.phone });
     for (const t of trainers) if (t.email) trainerLogins.push(`  ${t.email.padEnd(20)} — ${gym.name} багш (${t.name})`);
     console.log(`✓ ${gym.name}: ${trainers.length} багш, ${clientIds.length} үйлчлүүлэгч, ${gymPlans.size} багц, ${paymentCount} төлбөр`);
   }
+
+  for (const gym of DIRECTORY_GYMS) await createDirectoryGym(supabase, gym, { password: PASSWORD, contactPhone: true });
+  console.log(`✓ Фитнес хайх: ${DIRECTORY_GYMS.length + 1} фитнес нийтэд харагдана, 1 нь баталгаажуулалт хүлээж байна`);
 
   console.log(`\nБүх хэрэглэгчийн нууц үг: ${PASSWORD}`);
   console.log("  admin@demo.test      — платформын админ");
   for (const gym of GYMS) console.log(`  ${gym.manager.email.padEnd(20)} — ${gym.name} менежер`);
   for (const line of trainerLogins) console.log(line);
+  console.log(`  ${demoManagerEmail({ key: "<нэр>" })} — жишээ фитнесүүдийн менежер (${DIRECTORY_GYMS.map((g) => g.key).join(", ")})`);
 }
 
 main().catch((e) => {

@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, MailIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import { ArrowLeftIcon, ExternalLinkIcon, MailIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,6 +9,8 @@ import { accessText } from "@/features/admin/components/gym-list";
 import { RecordPlatformPayment } from "@/features/admin/components/record-platform-payment";
 import { getGymDetail, listGymPlatformPayments, listPlatformPlans } from "@/features/admin/queries";
 import { SUBSCRIPTION_STATUS, usageLevel } from "@/features/billing/status";
+import { listProfileFlags } from "@/features/directory/queries";
+import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth/context";
 import { formatDate, formatDateTime } from "@/lib/dates";
 import { PAYMENT_METHOD_LABELS } from "@/lib/membership";
@@ -22,8 +24,24 @@ export default async function AdminGymPage({ params }: PageProps<"/admin/gyms/[i
   const { id } = await params;
   const { today } = await requireAdmin();
   if (!isUuid(id)) notFound();
-  const [gym, payments, plans] = await Promise.all([getGymDetail(id), listGymPlatformPayments(id), listPlatformPlans()]);
+  const [gym, payments, plans, profiles] = await Promise.all([
+    getGymDetail(id),
+    listGymPlatformPayments(id),
+    listPlatformPlans(),
+    listProfileFlags(),
+  ]);
   if (!gym) notFound();
+  const profile = profiles.get(gym.gym_id);
+  const writable = gym.status === "trial" || gym.status === "active";
+  const listing = !profile
+    ? { variant: "outline" as const, label: "Танилцуулга үүсгээгүй" }
+    : !profile.isPublished
+      ? { variant: "outline" as const, label: "Ноорог (нийтлээгүй)" }
+      : !gym.verified_at
+        ? { variant: "warning" as const, label: "Баталгаажуулбал нийтэд харагдана" }
+        : !writable
+          ? { variant: "danger" as const, label: "Эрх дууссан тул нуугдсан" }
+          : { variant: "success" as const, label: "Нийтэд харагдаж байна" };
 
   const status = SUBSCRIPTION_STATUS[gym.status];
   const level = usageLevel(gym.client_count, gym.plan_max_clients);
@@ -124,6 +142,26 @@ export default async function AdminGymPage({ params }: PageProps<"/admin/gyms/[i
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Нийтийн танилцуулга</CardTitle>
+          <CardDescription>
+            “Фитнес хайх” хэсэгт зөвхөн менежер нийтэлсэн, баталгаажсан, эрх нь идэвхтэй фитнес харагдана.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <Badge variant={listing.variant}>{listing.label}</Badge>
+          {profile?.isPublished && gym.verified_at && writable && (
+            <Button asChild variant="outline" size="sm">
+              <a href={`/gyms/${profile.slug}`} target="_blank" rel="noopener noreferrer">
+                <ExternalLinkIcon />
+                Нийтийн хуудас
+              </a>
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -14,7 +14,14 @@ export function accessText(row: Pick<GymOverviewRow, "status" | "access_ends_on"
   return `${formatDate(row.access_ends_on)} хүртэл (${row.days_left} хоног)`;
 }
 
-export function GymList({ rows }: { rows: GymOverviewRow[] }) {
+export function GymList({
+  rows,
+  profiles,
+}: {
+  rows: GymOverviewRow[];
+  /** Танилцуулга нийтэлсэн ч баталгаажаагүй фитнесийг тэмдэглэхэд. */
+  profiles?: Map<string, { isPublished: boolean }>;
+}) {
   return (
     <ul className="divide-y">
       {rows.map((g) => {
@@ -29,6 +36,8 @@ export function GymList({ rows }: { rows: GymOverviewRow[] }) {
                   <Badge variant={status.variant}>{status.label}</Badge>
                   {g.verified_at ? (
                     <BadgeCheckIcon className="size-4 text-primary" aria-label="Баталгаажсан" />
+                  ) : profiles?.get(g.gym_id)?.isPublished ? (
+                    <Badge variant="warning">Танилцуулга баталгаажуулалт хүлээж байна</Badge>
                   ) : (
                     <Badge variant="outline">Баталгаажаагүй</Badge>
                   )}

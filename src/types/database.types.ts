@@ -228,6 +228,74 @@ export type Database = {
           },
         ]
       }
+      gym_profiles: {
+        Row: {
+          amenities: string[]
+          area: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          facebook_url: string | null
+          gym_id: string
+          instagram_url: string | null
+          is_published: boolean
+          latitude: number | null
+          longitude: number | null
+          opening_hours: Json | null
+          photo_paths: string[]
+          show_prices: boolean
+          slug: string
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[]
+          area?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          facebook_url?: string | null
+          gym_id: string
+          instagram_url?: string | null
+          is_published?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          opening_hours?: Json | null
+          photo_paths?: string[]
+          show_prices?: boolean
+          slug: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[]
+          area?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          facebook_url?: string | null
+          gym_id?: string
+          instagram_url?: string | null
+          is_published?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          opening_hours?: Json | null
+          photo_paths?: string[]
+          show_prices?: boolean
+          slug?: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_profiles_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: true
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_subscriptions: {
         Row: {
           created_at: string
@@ -905,6 +973,29 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_gym: {
+        Args: { p_slug: string }
+        Returns: {
+          address: string
+          amenities: string[]
+          area: string
+          contact_phone: string
+          description: string
+          facebook_url: string
+          instagram_url: string
+          latitude: number
+          logo_path: string
+          longitude: number
+          name: string
+          opening_hours: Json
+          photo_paths: string[]
+          plans: Json
+          show_prices: boolean
+          slug: string
+          tagline: string
+          updated_at: string
+        }[]
+      }
       gym_usage: {
         Args: { p_gym_id: string }
         Returns: {
@@ -912,6 +1003,23 @@ export type Database = {
           max_clients: number
           monthly_price: number
           plan_name: string
+        }[]
+      }
+      list_public_gyms: {
+        Args: never
+        Returns: {
+          address: string
+          amenities: string[]
+          area: string
+          cover_path: string
+          latitude: number
+          logo_path: string
+          longitude: number
+          name: string
+          opening_hours: Json
+          price_from: number
+          slug: string
+          tagline: string
         }[]
       }
       record_payment: {

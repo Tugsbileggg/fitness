@@ -20,7 +20,7 @@
     "db:stop": "supabase stop",
     "db:status": "supabase status",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
+    "db:types": "tsx scripts/db-types.ts",
     "db:seed": "tsx scripts/seed.ts",
     "admin:create": "tsx scripts/make-admin.ts",
     "dev:cloud": "node --env-file=.env.cloud.local node_modules/next/dist/bin/next dev",
@@ -30,6 +30,7 @@
     "cloud:push": "tsx scripts/cloud.ts push",
     "cloud:auth": "tsx scripts/cloud.ts auth",
     "cloud:plans": "node --env-file=.env.cloud.local --import tsx scripts/cloud-plans.ts",
+    "cloud:demo": "node --env-file=.env.cloud.local --import tsx scripts/cloud-demo-gyms.ts",
     "cloud:admin": "node --env-file=.env.cloud.local --import tsx scripts/make-admin.ts"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "@supabase/supabase-js": "2.116.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
+    "leaflet": "1.9.4",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",
     "radix-ui": "^1.6.7",
@@ -52,6 +54,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "1.9.22",
     "@types/node": "^24.13.5",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",

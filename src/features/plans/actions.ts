@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { dbErrorMessage, gymActionContext } from "@/lib/auth/action-context";
 import { type ActionResult, fail, fromZodError, ok } from "@/lib/validation";
+import { revalidateDirectory } from "@/features/directory/revalidate";
 import { planSchema, STARTER_PLANS, type PlanInput, type PlanValues } from "./schemas";
 
 function toRow(values: PlanValues) {
@@ -16,6 +17,8 @@ function toRow(values: PlanValues) {
 
 function revalidate() {
   revalidatePath("/plans");
+  // Нийтийн танилцуулгын үнэ эрхийн багцаас харагдана.
+  revalidateDirectory();
 }
 
 export async function savePlan(planId: string | null, input: PlanInput): Promise<ActionResult> {

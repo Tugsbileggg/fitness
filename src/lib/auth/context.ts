@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { PLATFORM_WARNING_DAYS } from "@/lib/config";
 import { diffDaysISO } from "@/lib/dates";
-import { publicEnv } from "@/lib/env";
+import { gymLogoUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/database.types";
 
@@ -37,11 +37,6 @@ export type SessionContext = {
   today: string;
   gym: GymContext | null;
 };
-
-export function gymLogoUrl(path: string | null | undefined): string | null {
-  if (!path) return null;
-  return `${publicEnv.supabaseUrl}/storage/v1/object/public/gym-logos/${path}`;
-}
 
 /**
  * Нэвтэрсэн хэрэглэгчийн мэдээлэл, фитнес, дүр, платформын төлөв. Нэг хүсэлтэд нэг л удаа DB-д хандана.

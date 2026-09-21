@@ -5,6 +5,7 @@ import {
   LayoutDashboardIcon,
   type LucideIcon,
   SettingsIcon,
+  StoreIcon,
   TagsIcon,
   UsersIcon,
   WalletIcon,
@@ -57,6 +58,12 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/trainers",
     label: "Багш нар",
     icon: DumbbellIcon,
+    roles: ["manager"],
+  },
+  {
+    href: "/listing",
+    label: "Танилцуулга",
+    icon: StoreIcon,
     roles: ["manager"],
   },
   {

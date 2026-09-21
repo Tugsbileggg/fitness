@@ -1,16 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 import {
+  ArrowRightIcon,
   BellRingIcon,
   CalendarClockIcon,
   CheckIcon,
+  LocateFixedIcon,
   SmartphoneIcon,
   UsersIcon,
   WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { Brand } from "@/components/brand";
+import { PublicFooter, PublicHeader } from "@/components/public-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GymCard } from "@/features/directory/components/gym-card";
+import { listPublicGyms } from "@/features/directory/queries";
 import { APP_NAME, TRIAL_DAYS } from "@/lib/config";
 import { formatMNT } from "@/lib/money";
 import type { Database } from "@/types/database.types";
@@ -30,6 +34,16 @@ async function getPlans() {
       .eq("is_active", true)
       .order("sort_order");
     return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Нүүр хуудсанд цөөн фитнес (зурагтай нь эхэнд). Алдаа гарвал хэсгийг нуух (нүүр хуудас унахгүй). */
+async function getFeaturedGyms() {
+  try {
+    const gyms = await listPublicGyms();
+    return [...gyms.filter((g) => g.coverUrl), ...gyms.filter((g) => !g.coverUrl)].slice(0, 3);
   } catch {
     return [];
   }
@@ -64,23 +78,11 @@ const FEATURES = [
 ];
 
 export default async function HomePage() {
-  const plans = await getPlans();
+  const [plans, gyms] = await Promise.all([getPlans(), getFeaturedGyms()]);
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
-          <Brand />
-          <nav className="flex items-center gap-2">
-            <Button asChild variant="ghost" className="hidden sm:inline-flex">
-              <Link href="/login">Нэвтрэх</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/register">Бүртгүүлэх</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-1">
         <section className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
@@ -99,6 +101,40 @@ export default async function HomePage() {
                 <Link href="/login">Нэвтрэх</Link>
               </Button>
             </div>
+          </div>
+        </section>
+
+        <section className="border-t bg-accent/40">
+          <div className="mx-auto max-w-6xl space-y-6 px-4 py-12">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-xl space-y-2">
+                <h2 className="text-2xl font-semibold tracking-tight">Фитнес хайж байна уу?</h2>
+                <p className="text-muted-foreground">
+                  Ойролцоох фитнесүүдийн үнэ, цагийн хуваарь, байршил, үйлчилгээг нэг дороос харьцуулаарай.
+                </p>
+              </div>
+              <Button asChild size="lg">
+                <Link href="/gyms">
+                  <LocateFixedIcon />
+                  Ойролцоох фитнес хайх
+                </Link>
+              </Button>
+            </div>
+            {gyms.length > 0 && (
+              <>
+                <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {gyms.map((gym) => (
+                    <li key={gym.slug} className="flex">
+                      <GymCard gym={gym} distance={null} />
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/gyms" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                  Бүх фитнесийг харах
+                  <ArrowRightIcon className="size-4" />
+                </Link>
+              </>
+            )}
           </div>
         </section>
 
@@ -148,11 +184,7 @@ export default async function HomePage() {
         )}
       </main>
 
-      <footer className="border-t">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">
-          © {new Date().getFullYear()} {APP_NAME}
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

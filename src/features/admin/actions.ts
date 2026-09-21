@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { dbErrorMessage } from "@/lib/auth/action-context";
+import { revalidateDirectory } from "@/features/directory/revalidate";
 import { getSessionContext } from "@/lib/auth/context";
 import { createClient } from "@/lib/supabase/server";
 import { type ActionResult, fail, fromZodError, ok } from "@/lib/validation";
@@ -28,6 +29,8 @@ function rpcError(error: { code?: string; message?: string }) {
 function revalidateGym(gymId?: string) {
   revalidatePath("/admin", "layout");
   if (gymId) revalidatePath(`/admin/gyms/${gymId}`);
+  // Баталгаажуулалт, түр зогсоолт, платформын эрх нь нийтийн жагсаалтад гарах эсэхийг тодорхойлно.
+  revalidateDirectory();
 }
 
 export async function recordPlatformPayment(
