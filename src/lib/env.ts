@@ -4,7 +4,8 @@
 function required(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(
-      `${name} орчны хувьсагч тохируулагдаагүй байна. .env.example-г .env.local болгон хуулж бөглөнө үү.`,
+      `${name} орчны хувьсагч тохируулагдаагүй байна. Локал: .env.example-г .env.local болгон хуулж бөглөнө үү. ` +
+        `Vercel: Settings → Environment Variables-д яг энэ нэрээр нэмээд дахин deploy хийнэ үү.`,
     );
   }
   return value;
