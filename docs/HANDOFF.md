@@ -37,23 +37,23 @@ Supabase төсөл: `hflpfpamiwhxriwbngcg` (Seoul). Vercel: https://fitness-pi-
 GitHub: https://github.com/Tugsbileggg/fitness (**public** — `.env*` git-д ордоггүй, түүх шалгасан, цэвэр).
 
 Хийгдсэн:
-- Migration 01–05, тарифууд (Эхлэл / Стандарт / Про), платформын админ (хэрэглэгч өөрөө үүсгэсэн).
-- `.env.cloud.local`: `NEXT_PUBLIC_SITE_URL=https://fitness-pi-opal-62.vercel.app`, дансны мэдээлэл түр хуурамч
-  (`5012345678`, "Фитнес Хяналт ХХК", `77001122`) — бодит данс гармагц солих.
+- Migration 01–06 (06 = "Фитнес хайх", 2026.09.21-нд push хийсэн), тарифууд (Эхлэл / Стандарт / Про),
+  платформын админ (хэрэглэгч өөрөө үүсгэсэн).
+- `pnpm cloud:auth`: Site URL = `https://fitness-pi-opal-62.vercel.app`, redirect allow-list шинэчлэгдсэн.
+- `pnpm cloud:demo`: 7 жишээ фитнес нийтэд харагдана (утасгүй, нэвтрэх эрхгүй менежер, туршилт 1 жил).
+  Бодит фитнесүүд нэгдмэгц `pnpm cloud:demo --unpublish`.
+- `.env.cloud.local`: дансны мэдээлэл түр хуурамч (`5012345678`, "Фитнес Хяналт ХХК", `77001122`) — бодит данс
+  гармагц солих (Vercel-ийн хувьсагчид мөн).
 
-Хийгдээгүй (дараалал чухал):
-1. **Vercel env хувьсагч.** 2026.09.21-нд сайт бүх хуудсанд 500 хэвээр байсан. Vercel-ийн Supabase integration
-   хуучин нэрсээр (`…_ANON_KEY`, `…_SERVICE_ROLE_KEY`) тавьдаг, төсөл шинэ нэрсийг хэрэглэдэг. README "Deploy"
-   хэсгийн 8 хувьсагчийг яг тэр нэрээр нэмэх. Integration шинэ Supabase төсөл үүсгэсэн эсэхийг
-   (`NEXT_PUBLIC_SUPABASE_URL`) шалгах. 6-р үе шатаас хойш хувьсагч дутвал **build өөрөө унана** (`/gyms` build-ийн
-   үед Supabase-ээс уншдаг) — лог дээр дутсан хувьсагчийн нэр монголоор гарна.
-2. **`pnpm cloud:push`** — migration 06 (`gym_profiles`). **GitHub руу push хийхээс өмнө** ажиллуулах: эс бөгөөс
-   Vercel-ийн build `list_public_gyms` RPC олдохгүй гэж унана.
-3. **`pnpm cloud:auth`** — Site URL-ийг Vercel хаяг болгох (имэйлийн холбоос localhost руу заахгүй).
-4. **`pnpm cloud:demo`** (заавал биш) — "Фитнес хайх"-д 7 жишээ фитнес. Бодит фитнес ирмэгц `--unpublish`.
-5. **SMTP** (Resend) — домэйн худалдаж авсны дараа. Resend домэйнгүй бол зөвхөн өөрийн имэйл рүү илгээнэ.
-   Dashboard дээр SMTP оруулаад `pnpm cloud:auth` дахин.
-6. **Түлхүүр солих** — хэрэглэгч одоохондоо солихгүй гэж шийдсэн (secret key, access token өмнөх чатад харагдсан).
+Хийгдээгүй:
+1. **Vercel env хувьсагч.** Vercel-ийн Supabase integration хуучин нэрсээр (`…_ANON_KEY`, `…_SERVICE_ROLE_KEY`)
+   тавьдаг, төсөл шинэ нэрсийг хэрэглэдэг. README "Deploy" хэсгийн 8 хувьсагчийг яг тэр нэрээр нэмэх.
+   Integration шинэ Supabase төсөл үүсгэсэн эсэхийг (`NEXT_PUBLIC_SUPABASE_URL`) шалгах. Хувьсагч дутвал
+   **build өөрөө унана** (`/gyms` build-ийн үед Supabase-ээс уншдаг) — лог дээр дутсан хувьсагчийн нэр монголоор.
+2. **Шинэ migration-тэй код:** эхлээд `pnpm cloud:push`, дараа нь `git push` (эс бөгөөс Vercel build унана).
+3. **SMTP** (Resend) — домэйн худалдаж авсны дараа. Resend домэйнгүй бол зөвхөн өөрийн имэйл рүү илгээнэ.
+   Dashboard дээр SMTP оруулаад `pnpm cloud:auth` дахин (монгол имэйл загвар орно).
+4. **Түлхүүр солих** — хэрэглэгч одоохондоо солихгүй гэж шийдсэн (secret key, access token өмнөх чатад харагдсан).
 
 ## Санаж байх шийдвэрүүд
 
