@@ -13,11 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/features/auth/actions";
-
-export function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  return (parts.length > 1 ? parts[0][0] + parts[1][0] : name.slice(0, 2)).toUpperCase();
-}
+import { initials } from "@/lib/utils";
 
 export function UserMenu({ fullName, roleLabel }: { fullName: string; roleLabel: string }) {
   return (

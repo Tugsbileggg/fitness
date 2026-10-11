@@ -24,24 +24,38 @@ export type ClientListFilters = {
   page?: number;
 };
 
+type SearchFilterable<Q> = {
+  like(column: "phone", pattern: string): Q;
+  ilike(column: "full_name", pattern: string): Q;
+  is(column: "assigned_trainer_id", value: null): Q;
+  eq(column: "assigned_trainer_id", value: string): Q;
+};
+
+/** Хайлт ба багшийн шүүлт. Жагсаалт болон төлөвийн тоонд адилхан хэрэглэгдэнэ. */
+function withSearchFilters<Q extends SearchFilterable<Q>>(query: Q, filters: ClientListFilters): Q {
+  const search = parseClientSearch(filters.q);
+  if (search?.kind === "phone") query = query.like("phone", search.pattern);
+  if (search?.kind === "name") query = query.ilike("full_name", search.pattern);
+  if (filters.trainerId === "none") query = query.is("assigned_trainer_id", null);
+  else if (filters.trainerId) query = query.eq("assigned_trainer_id", filters.trainerId);
+  return query;
+}
+
 /** client_status_v (security_invoker) нь устгасан үйлчлүүлэгчийг аль хэдийн хасдаг. */
 export async function listClients(gymId: string, filters: ClientListFilters) {
   const supabase = await createClient();
   const page = Math.max(1, filters.page ?? 1);
   const from = (page - 1) * CLIENTS_PAGE_SIZE;
 
-  let query = supabase
-    .from("client_status_v")
-    .select("id, full_name, phone, gender, birth_year, trainer_name, ends_on, status, days_left", {
-      count: "exact",
-    })
-    .eq("gym_id", gymId);
-
-  const search = parseClientSearch(filters.q);
-  if (search?.kind === "phone") query = query.like("phone", search.pattern);
-  if (search?.kind === "name") query = query.ilike("full_name", search.pattern);
-  if (filters.trainerId === "none") query = query.is("assigned_trainer_id", null);
-  else if (filters.trainerId) query = query.eq("assigned_trainer_id", filters.trainerId);
+  let query = withSearchFilters(
+    supabase
+      .from("client_status_v")
+      .select("id, full_name, phone, gender, birth_year, trainer_name, ends_on, status, days_left", {
+        count: "exact",
+      })
+      .eq("gym_id", gymId),
+    filters,
+  );
   if (filters.status === "active") query = query.in("status", ["active", "expiring"]);
   else if (filters.status) query = query.eq("status", filters.status);
 
@@ -60,6 +74,28 @@ export async function listClients(gymId: string, filters: ClientListFilters) {
     page,
     pageSize: CLIENTS_PAGE_SIZE,
   };
+}
+
+/**
+ * Төлөвийн tab-уудын тоо (хайлт ба багшийн шүүлттэй). "active" нь дуусах гэж буйг оруулна,
+ * тиймээс бүгд = active + expired + none.
+ */
+export async function countClientsByStatus(gymId: string, filters: ClientListFilters) {
+  const supabase = await createClient();
+  const base = () =>
+    withSearchFilters(
+      supabase.from("client_status_v").select("id", { count: "exact", head: true }).eq("gym_id", gymId),
+      filters,
+    );
+  const results = await Promise.all([
+    base().in("status", ["active", "expiring"]),
+    base().eq("status", "expiring"),
+    base().eq("status", "expired"),
+    base().eq("status", "none"),
+  ]);
+  for (const r of results) if (r.error) throw r.error;
+  const [active, expiring, expired, none] = results.map((r) => r.count ?? 0);
+  return { all: active + expired + none, active, expiring, expired, none };
 }
 
 export async function getClient(gymId: string, clientId: string) {

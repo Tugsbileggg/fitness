@@ -13,7 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** Нэр/утсаар хайх ба багшаар шүүх. Утгууд URL-д хадгалагдана (буцах товч, хуваалцахад). */
+/**
+ * Нэр/утсаар хайх ба багшаар шүүх. Утгууд URL-д хадгалагдана (буцах товч, хуваалцахад).
+ * Төлөвийн шүүлт нь хуудасны tab-ууд (status-tabs.tsx).
+ */
 export function ClientFilters({ trainers }: { trainers: { id: string; full_name: string }[] }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -44,18 +47,17 @@ export function ClientFilters({ trainers }: { trainers: { id: string; full_name:
   }
 
   const trainer = searchParams.get("trainer") ?? "all";
-  const status = searchParams.get("status") ?? "all";
 
   return (
-    <div className="mb-4 flex flex-col gap-2 sm:flex-row">
-      <div className="relative flex-1">
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="relative flex-1 sm:min-w-64">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
           value={q}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Нэр эсвэл утсаар хайх"
-          className="pr-10 pl-9"
+          className="pr-10 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
           aria-label="Үйлчлүүлэгч хайх"
         />
         {pending ? (
@@ -75,18 +77,6 @@ export function ClientFilters({ trainers }: { trainers: { id: string; full_name:
           )
         )}
       </div>
-      <Select value={status} onValueChange={(v) => update({ status: v === "all" ? null : v })}>
-        <SelectTrigger className="w-full sm:w-48" aria-label="Эрхийн төлөвөөр шүүх">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Бүх төлөв</SelectItem>
-          <SelectItem value="active">Идэвхтэй</SelectItem>
-          <SelectItem value="expiring">Дуусах гэж буй</SelectItem>
-          <SelectItem value="expired">Дууссан</SelectItem>
-          <SelectItem value="none">Эрхгүй</SelectItem>
-        </SelectContent>
-      </Select>
       {trainers.length > 0 && (
         <Select value={trainer} onValueChange={(v) => update({ trainer: v === "all" ? null : v })}>
           <SelectTrigger className="w-full sm:w-48" aria-label="Багшаар шүүх">

@@ -1,18 +1,16 @@
-import { ChevronRightIcon, PlusIcon, SearchXIcon, UsersIcon } from "lucide-react";
+import { PlusIcon, SearchXIcon, UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Pagination } from "@/components/pagination";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ClientFilters } from "@/features/clients/components/client-filters";
-import { isStatusFilter, listClients } from "@/features/clients/queries";
-import { ageFromBirthYear, GENDER_LABELS } from "@/features/clients/schemas";
-import { MembershipBadge } from "@/features/payments/components/membership-badge";
+import { ClientList } from "@/features/clients/components/client-list";
+import { StatusTabs } from "@/features/clients/components/status-tabs";
+import { countClientsByStatus, isStatusFilter, listClients } from "@/features/clients/queries";
 import { trainerOptions } from "@/features/trainers/queries";
 import { requireGymContext } from "@/lib/auth/context";
-import { formatPhone } from "@/lib/phone";
 import { isUuid } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Үйлчлүүлэгчид" };
@@ -31,11 +29,14 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
   const status = isStatusFilter(statusParam) ? statusParam : undefined;
   const page = Number(param(sp.page)) || 1;
 
-  const [{ rows, total, pageSize }, trainers] = await Promise.all([
+  const [{ rows, total, pageSize }, counts, trainers] = await Promise.all([
     listClients(gym.id, { q, trainerId, status, page }),
+    countClientsByStatus(gym.id, { q, trainerId }),
     trainerOptions(gym.id),
   ]);
   const filtered = Boolean(q || trainerId || status);
+  // Хайлт, шүүлтгүй үед ч үйлчлүүлэгч байхгүй бол шүүлтүүрүүдийг нуух.
+  const hasAny = counts.all > 0 || Boolean(q || trainerId);
 
   const addButton = gym.isWritable ? (
     <Button asChild>
@@ -50,18 +51,23 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
     <>
       <PageHeader
         title="Үйлчлүүлэгчид"
-        description={total > 0 || filtered ? `Нийт ${total} үйлчлүүлэгч` : undefined}
+        description={hasAny ? `Нийт ${counts.all} үйлчлүүлэгч` : undefined}
         actions={addButton}
       />
 
-      {(total > 0 || filtered) && <ClientFilters trainers={trainers} />}
+      {hasAny && (
+        <div className="mb-4 flex flex-col gap-3">
+          <StatusTabs current={status} counts={counts} params={{ q, trainer: trainerId }} />
+          <ClientFilters trainers={trainers} />
+        </div>
+      )}
 
       {rows.length === 0 ? (
         filtered ? (
           <EmptyState
             icon={SearchXIcon}
             title="Илэрц олдсонгүй"
-            description="Өөр нэр, утасны дугаараар хайж үзнэ үү."
+            description="Өөр нэр, утасны дугаараар хайж эсвэл өөр төлөв сонгож үзнэ үү."
           />
         ) : (
           <EmptyState
@@ -72,34 +78,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
           />
         )
       ) : (
-        <Card className="divide-y p-0">
-          {rows.map((c) => (
-            <Link
-              key={c.id}
-              href={`/clients/${c.id}`}
-              className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="truncate font-medium">{c.full_name}</span>
-                  <MembershipBadge
-                    endsOn={c.ends_on}
-                    today={today}
-                    threshold={gym.expiringThresholdDays}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-x-3 text-sm text-muted-foreground">
-                  <span>{formatPhone(c.phone)}</span>
-                  <span>
-                    {c.gender && GENDER_LABELS[c.gender]}, {ageFromBirthYear(c.birth_year ?? 0, today)} настай
-                  </span>
-                  {c.trainer_name && <span>Багш: {c.trainer_name}</span>}
-                </div>
-              </div>
-              <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" />
-            </Link>
-          ))}
-        </Card>
+        <ClientList rows={rows} today={today} threshold={gym.expiringThresholdDays} />
       )}
 
       <Pagination
