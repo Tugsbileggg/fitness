@@ -9,6 +9,7 @@ import { PublicFooter, PublicHeader } from "@/components/public-header";
 import { Button } from "@/components/ui/button";
 import { GymCard } from "@/features/directory/components/gym-card";
 import { listPublicGyms } from "@/features/directory/queries";
+import { DumbbellHero } from "@/features/landing/components/dumbbell-hero";
 import { FeatureBento } from "@/features/landing/components/feature-bento";
 import { HeroPreview } from "@/features/landing/components/hero-preview";
 import { PricingPlans } from "@/features/landing/components/pricing-plans";
@@ -74,51 +75,51 @@ export default async function HomePage() {
       <PublicHeader className="dark" />
 
       <main className="flex-1">
-        <section className="dark relative isolate overflow-hidden bg-background text-foreground">
-          <div aria-hidden data-parallax="0.3" className="absolute inset-x-0 top-0 -z-10 h-[125%]">
-            <Image
-              src={heroGym}
-              alt=""
-              fill
-              priority
-              placeholder="blur"
-              sizes="100vw"
-              className="object-cover object-[center_40%] opacity-40 grayscale-[35%]"
-            />
+        <DumbbellHero
+          background={
+            <>
+              <Image
+                src={heroGym}
+                alt=""
+                fill
+                priority
+                placeholder="blur"
+                sizes="100vw"
+                className="-z-10 object-cover object-[center_40%] opacity-25 grayscale-[35%]"
+              />
+              <div aria-hidden className="absolute inset-0 -z-10 bg-linear-to-b from-ink/70 via-ink/85 to-ink" />
+              <div aria-hidden data-spotlight className="absolute inset-0 -z-10" />
+            </>
+          }
+        >
+          <p
+            className={`inline-flex items-center gap-2 rounded-full border bg-background/40 px-3 py-1 text-sm text-muted-foreground backdrop-blur ${ENTER}`}
+          >
+            <span className="size-2 rounded-full bg-brand" aria-hidden />
+            {TRIAL_DAYS} хоног үнэгүй · Апп татах шаардлагагүй
+          </p>
+          <h1
+            className={`mx-auto mt-5 max-w-4xl font-display text-[1.75rem] leading-[1.1] tracking-tight text-balance sm:text-5xl lg:text-6xl ${ENTER} motion-safe:delay-100`}
+          >
+            Фитнесийнхээ үйлчлүүлэгч, төлбөрийг <span className="text-brand">нэг дороос</span> хянаарай
+          </h1>
+          <p className={`mx-auto mt-4 max-w-xl text-muted-foreground sm:text-lg ${ENTER} motion-safe:delay-200`}>
+            Дэвтэр, Excel хэрэггүй. Хэний эрх хэзээ дуусахыг {APP_NAME} танд өөрөө сануулна.
+          </p>
+          <div className={`mt-6 flex flex-col justify-center gap-3 sm:flex-row ${ENTER} motion-safe:delay-300`}>
+            <Button asChild size="lg">
+              <Link href="/register">
+                {TRIAL_DAYS} хоног үнэгүй туршиж үзэх
+                <ArrowRightIcon data-icon="inline-end" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="max-sm:hidden">
+              <Link href="/login">Нэвтрэх</Link>
+            </Button>
           </div>
-          <div aria-hidden className="absolute inset-0 -z-10 bg-linear-to-b from-ink/70 via-ink/80 to-ink" />
-          <div aria-hidden data-spotlight className="absolute inset-0 -z-10" />
+        </DumbbellHero>
 
-          <div className="mx-auto max-w-6xl px-4 pt-16 pb-44 text-center sm:pt-24 sm:pb-60">
-            <p
-              className={`inline-flex items-center gap-2 rounded-full border bg-background/40 px-3 py-1 text-sm text-muted-foreground backdrop-blur ${ENTER}`}
-            >
-              <span className="size-2 rounded-full bg-brand" aria-hidden />
-              {TRIAL_DAYS} хоног үнэгүй · Апп татах шаардлагагүй
-            </p>
-            <h1
-              className={`mx-auto mt-6 max-w-4xl font-display text-[2rem] leading-[1.1] tracking-tight text-balance sm:text-5xl lg:text-6xl ${ENTER} motion-safe:delay-100`}
-            >
-              Фитнесийнхээ үйлчлүүлэгч, төлбөрийг <span className="text-brand">нэг дороос</span> хянаарай
-            </h1>
-            <p className={`mx-auto mt-6 max-w-xl text-lg text-muted-foreground ${ENTER} motion-safe:delay-200`}>
-              Дэвтэр, Excel хэрэггүй. Хэний эрх хэзээ дуусахыг {APP_NAME} танд өөрөө сануулна.
-            </p>
-            <div className={`mt-8 flex flex-col justify-center gap-3 sm:flex-row ${ENTER} motion-safe:delay-300`}>
-              <Button asChild size="lg">
-                <Link href="/register">
-                  {TRIAL_DAYS} хоног үнэгүй туршиж үзэх
-                  <ArrowRightIcon data-icon="inline-end" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/login">Нэвтрэх</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <div className={`-mt-36 px-4 sm:-mt-48 ${ENTER} motion-safe:delay-500 motion-safe:duration-1000`}>
+        <div className="dark bg-background px-4 pt-4 pb-16 sm:pb-24">
           <HeroPreview />
         </div>
 
