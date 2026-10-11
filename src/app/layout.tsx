@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/config";
+import { publicEnv } from "@/lib/env";
 import "./globals.css";
 
 // Монгол кирилл үсгүүд (Ө, Ү) `cyrillic-ext`-д, төгрөгийн тэмдэг (₮, U+20AE) `latin-ext`-д байдаг.
@@ -20,8 +21,11 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  // OG зураг, canonical холбоосууд бүрэн хаягтай байх ёстой (Facebook, Messenger-ийн урьдчилсан харагдац).
+  metadataBase: new URL(publicEnv.siteUrl),
   title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
   description: APP_DESCRIPTION,
+  openGraph: { siteName: APP_NAME, locale: "mn_MN", type: "website" },
 };
 
 export const viewport: Viewport = {

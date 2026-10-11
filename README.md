@@ -160,7 +160,7 @@ Seed зөвхөн локал Supabase дээр ажиллана.
    - Бүс: Seoul (`ap-northeast-2`) эсвэл Tokyo. Хамгийн ойр нь эдгээр.
 2. **Vercel.**
    - GitHub repo-гоо импортлоно. Framework: Next.js, Build: `pnpm build`.
-   - *Settings → Functions → Region*: `icn1` (Seoul), өгөгдлийн сантай ойр байхаар.
+   - Функцийн бүс `vercel.json`-д `icn1` (Seoul), өгөгдлийн сантай ойр. Өөр бүс рүү шилжвэл хуудас бүрийн DB хүсэлт далай дамжиж 1–2 секунд удаашрана.
    - *Environment Variables* — найман хувьсагч, яг эдгээр нэрээр:
      `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`,
      `NEXT_PUBLIC_SITE_URL` (жишээ нь `https://app.example.mn`), `PLATFORM_BANK_NAME`, `PLATFORM_BANK_ACCOUNT`,
@@ -208,6 +208,3 @@ Seed зөвхөн локал Supabase дээр ажиллана.
 
 Мобайл апп, QPay интеграц (`payment_method` enum-д `qpay` утга бэлэн), SMS/Messenger сануулга, ирц бүртгэл,
 үйлчлүүлэгчийн нэвтрэлт.
-#   f i t n e s s 
- 
- 

@@ -5,7 +5,7 @@ import type { Database } from "@/types/database.types";
 
 // Нэвтрэх шаардлагатай замууд. Дүрийн нарийн шалгалтыг layout, Server Action, RLS хийнэ;
 // proxy зөвхөн session-ийг шинэчилж, нэвтрээгүй хэрэглэгчийг /login руу чиглүүлнэ.
-const PROTECTED_PREFIXES = [
+export const PROTECTED_PREFIXES = [
   "/dashboard",
   "/clients",
   "/trainers",
