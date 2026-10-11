@@ -1,19 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Onest, Unbounded } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 import { APP_DESCRIPTION, APP_NAME } from "@/lib/config";
 import "./globals.css";
 
-// Монгол кирилл үсгүүд (Ө, Ү) `cyrillic-ext` subset-д байдаг.
-const onest = Onest({
+// Монгол кирилл үсгүүд (Ө, Ү) `cyrillic-ext`-д, төгрөгийн тэмдэг (₮, U+20AE) `latin-ext`-д байдаг.
+// Subset байгаа нь фонтод тэр үсэг байна гэсэн үг биш: Unbounded, Onest, Golos зэрэгт Ө/Ү эсвэл ₮ алга.
+// Фонт солихоосоо өмнө "Ө ө Ү ү ₮" бүгдийг хөтөч дээр шалгана.
+const inter = Inter({
   variable: "--font-sans",
-  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   display: "swap",
 });
 
-// Том гарчгуудад (`font-display`). Өргөн үсэгтэй тул жижиг текстэд бүү хэрэглэ.
-const unbounded = Unbounded({
+// Том гарчиг, тоонд (`font-display`, globals.css-д ExtraBold). Жижиг текстэд бүү хэрэглэ.
+const montserrat = Montserrat({
   variable: "--font-display",
-  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   display: "swap",
 });
 
@@ -30,7 +32,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="mn" className={`${onest.variable} ${unbounded.variable} h-full antialiased`}>
+    <html lang="mn" className={`${inter.variable} ${montserrat.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
