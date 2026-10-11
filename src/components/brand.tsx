@@ -7,7 +7,8 @@ export function BrandMark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground",
+        // Цайвар суурь дээр brand өнгө харагдахгүй тул бэх дэвсгэр дээр, бараан дээр эсрэгээр нь.
+        "inline-flex size-9 items-center justify-center rounded-xl bg-ink text-brand dark:bg-brand dark:text-ink",
         className,
       )}
     >
@@ -20,7 +21,7 @@ export function Brand({ href = "/", className }: { href?: string; className?: st
   return (
     <Link href={href} className={cn("inline-flex items-center gap-2.5 font-semibold", className)}>
       <BrandMark />
-      <span className="text-lg tracking-tight">{APP_NAME}</span>
+      <span className="font-display text-sm whitespace-nowrap tracking-tight sm:text-base">{APP_NAME}</span>
     </Link>
   );
 }
