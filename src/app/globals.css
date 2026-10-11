@@ -123,7 +123,7 @@
   --chart-3: oklch(0.6 0.12 138);
   --chart-4: oklch(0.45 0.06 148);
   --chart-5: oklch(0.35 0.02 150);
-  --sidebar: oklch(0.228 0.013 150);
+  --sidebar: var(--ink);
   --sidebar-foreground: oklch(0.967 0.006 120);
   --sidebar-primary: oklch(0.93 0.2 122);
   --sidebar-primary-foreground: var(--ink);
@@ -139,6 +139,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* font-display үргэлж ExtraBold. Өөр жин хэрэгтэй бол font-* utility-ээр дарна. */
+  .font-display {
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
   ::selection {
     background-color: var(--brand);

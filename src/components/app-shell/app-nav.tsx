@@ -27,13 +27,13 @@ type ShellProps = {
   fullName: string;
 };
 
-/** Компьютерийн хажуугийн цэс (lg-ээс дээш). */
+/** Компьютерийн хажуугийн цэс (lg-ээс дээш). Бараан (`dark`), идэвхтэй цэс нь brand өнгөөр. */
 export function DesktopSidebar({ gymName, logoUrl, role, fullName }: ShellProps) {
   const pathname = usePathname();
   const items = navItemsFor(role);
 
   return (
-    <aside className="sticky top-0 hidden h-svh flex-col border-r bg-sidebar lg:flex">
+    <aside className="dark sticky top-0 hidden h-svh flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
       <div className="flex items-center gap-3 px-4 py-5">
         <GymLogo name={gymName} logoUrl={logoUrl} />
         <span className="line-clamp-2 text-sm leading-tight font-semibold">{gymName}</span>
@@ -47,8 +47,8 @@ export function DesktopSidebar({ gymName, logoUrl, role, fullName }: ShellProps)
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                active && "bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent",
+                "flex h-10 items-center gap-3 rounded-full px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                active && "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground",
               )}
             >
               <item.icon className="size-[18px]" />
@@ -57,7 +57,7 @@ export function DesktopSidebar({ gymName, logoUrl, role, fullName }: ShellProps)
           );
         })}
       </nav>
-      <div className="border-t p-3">
+      <div className="border-t border-sidebar-border p-3">
         <UserMenu fullName={fullName} roleLabel={ROLE_LABELS[role]} />
       </div>
     </aside>
@@ -155,10 +155,12 @@ export function MobileBottomNav({ role }: { role: StaffRole }) {
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground",
-              active && "text-primary",
+              active && "text-foreground",
             )}
           >
-            <item.icon className="size-5" />
+            <span className={cn("flex h-7 w-12 items-center justify-center rounded-full", active && "bg-brand text-ink")}>
+              <item.icon className="size-5" />
+            </span>
             {item.shortLabel ?? item.label}
           </Link>
         );

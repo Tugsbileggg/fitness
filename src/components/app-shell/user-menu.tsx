@@ -23,7 +23,7 @@ export function UserMenu({ fullName, roleLabel }: { fullName: string; roleLabel:
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto w-full justify-start gap-3 px-2 py-2">
+        <Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-xl px-2 py-2">
           <Avatar className="size-8">
             <AvatarFallback className="text-xs">{initials(fullName)}</AvatarFallback>
           </Avatar>

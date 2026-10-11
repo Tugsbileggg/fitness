@@ -13,36 +13,54 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Хяналт" };
 
+/** "attention" нь бараан карт (анхаарах зүйл байгаа үед), "danger" нь улаан тоо. */
 function Stat({
   label,
   value,
   hint,
   href,
   tone,
+  className,
 }: {
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
   href?: string;
-  tone?: "warning" | "danger";
+  tone?: "attention" | "danger";
+  className?: string;
 }) {
   const content = (
-    <Card
+    <div
       className={cn(
-        "h-full gap-1 py-4 transition-colors",
-        href && "hover:bg-muted/40",
-        tone === "warning" && "border-amber-300 bg-amber-50/60",
-        tone === "danger" && "border-red-200 bg-red-50/60",
+        "flex h-full flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground transition-colors",
+        !href && className,
+        href && "hover:border-foreground/25",
+        tone === "attention" && "dark border-transparent bg-background text-foreground hover:border-brand/50",
       )}
     >
-      <CardHeader className="px-4">
-        <CardDescription>{label}</CardDescription>
-        <CardTitle className="text-2xl tabular-nums">{value}</CardTitle>
-      </CardHeader>
-      {hint && <CardContent className="px-4 text-sm text-muted-foreground">{hint}</CardContent>}
-    </Card>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p
+        className={cn(
+          "font-display text-2xl tabular-nums sm:text-3xl",
+          tone === "attention" && "text-brand",
+          tone === "danger" && "text-red-600",
+        )}
+      >
+        {value}
+      </p>
+      {hint && <p className="mt-auto pt-1 text-sm text-muted-foreground">{hint}</p>}
+    </div>
   );
-  return href ? <Link href={href}>{content}</Link> : content;
+  return href ? (
+    <Link
+      href={href}
+      className={cn("rounded-2xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none", className)}
+    >
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }
 
 export default async function DashboardPage() {
@@ -64,7 +82,7 @@ export default async function DashboardPage() {
         <Stat
           label={`${gym.expiringThresholdDays} хоногт дуусах`}
           value={summary.expiring_count}
-          tone={summary.expiring_count > 0 ? "warning" : undefined}
+          tone={summary.expiring_count > 0 ? "attention" : undefined}
           href="/clients?status=expiring"
         />
         <Stat
@@ -80,12 +98,14 @@ export default async function DashboardPage() {
             value={formatMNT(summary.month_revenue)}
             hint={`Шинэ ${summary.month_new_clients} · Сунгасан ${summary.month_renewed_clients}`}
             href="/payments"
+            className="col-span-2 lg:col-span-1"
           />
         ) : (
           <Stat
             label="Энэ сар"
             value={`${summary.month_new_clients + summary.month_renewed_clients}`}
             hint={`Шинэ ${summary.month_new_clients} · Сунгасан ${summary.month_renewed_clients}`}
+            className="col-span-2 lg:col-span-1"
           />
         )}
       </div>
