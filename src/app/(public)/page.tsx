@@ -1,8 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { ArrowRightIcon, LocateFixedIcon } from "lucide-react";
 import type { Viewport } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { PointerGlow, ScrollEffects } from "@/components/motion-effects";
 import { PublicFooter, PublicHeader } from "@/components/public-header";
 import { Button } from "@/components/ui/button";
 import { GymCard } from "@/features/directory/components/gym-card";
@@ -10,7 +12,9 @@ import { listPublicGyms } from "@/features/directory/queries";
 import { FeatureBento } from "@/features/landing/components/feature-bento";
 import { HeroPreview } from "@/features/landing/components/hero-preview";
 import { PricingPlans } from "@/features/landing/components/pricing-plans";
+import { ctaDumbbell, directoryGym, heroGym } from "@/features/landing/images";
 import { APP_NAME, TRIAL_DAYS } from "@/lib/config";
+import { revealDelay } from "@/lib/motion";
 import type { Database } from "@/types/database.types";
 
 // Нүүр хуудсыг цагт нэг удаа шинэчилнэ (тарифын үнэ өөрчлөгдвөл).
@@ -46,9 +50,13 @@ async function getFeaturedGyms() {
   }
 }
 
+// Hero-гийн мөрүүд ачаалахад дараалан гарч ирнэ (эхний дэлгэцэнд байгаа тул data-reveal биш).
+const ENTER =
+  "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-6 motion-safe:duration-700 motion-safe:ease-out motion-safe:fill-mode-backwards";
+
 function SectionHeading({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
   return (
-    <div className="max-w-2xl space-y-3">
+    <div data-reveal className="max-w-2xl space-y-3">
       <p className="text-sm font-semibold text-accent-foreground">{eyebrow}</p>
       <h2 className="font-display text-3xl leading-tight tracking-tight text-balance sm:text-4xl">{title}</h2>
       {children && <p className="text-lg text-muted-foreground">{children}</p>}
@@ -61,22 +69,42 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-svh flex-col">
+      <ScrollEffects />
+      <PointerGlow />
       <PublicHeader className="dark" />
 
       <main className="flex-1">
-        <section className="dark bg-background text-foreground">
+        <section className="dark relative isolate overflow-hidden bg-background text-foreground">
+          <div aria-hidden data-parallax="0.3" className="absolute inset-x-0 top-0 -z-10 h-[125%]">
+            <Image
+              src={heroGym}
+              alt=""
+              fill
+              priority
+              placeholder="blur"
+              sizes="100vw"
+              className="object-cover object-[center_40%] opacity-40 grayscale-[35%]"
+            />
+          </div>
+          <div aria-hidden className="absolute inset-0 -z-10 bg-linear-to-b from-ink/70 via-ink/80 to-ink" />
+          <div aria-hidden data-spotlight className="absolute inset-0 -z-10" />
+
           <div className="mx-auto max-w-6xl px-4 pt-16 pb-44 text-center sm:pt-24 sm:pb-60">
-            <p className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm text-muted-foreground">
+            <p
+              className={`inline-flex items-center gap-2 rounded-full border bg-background/40 px-3 py-1 text-sm text-muted-foreground backdrop-blur ${ENTER}`}
+            >
               <span className="size-2 rounded-full bg-brand" aria-hidden />
               {TRIAL_DAYS} хоног үнэгүй · Апп татах шаардлагагүй
             </p>
-            <h1 className="mx-auto mt-6 max-w-4xl font-display text-[2rem] leading-[1.1] tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            <h1
+              className={`mx-auto mt-6 max-w-4xl font-display text-[2rem] leading-[1.1] tracking-tight text-balance sm:text-5xl lg:text-6xl ${ENTER} motion-safe:delay-100`}
+            >
               Фитнесийнхээ үйлчлүүлэгч, төлбөрийг <span className="text-brand">нэг дороос</span> хянаарай
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+            <p className={`mx-auto mt-6 max-w-xl text-lg text-muted-foreground ${ENTER} motion-safe:delay-200`}>
               Дэвтэр, Excel хэрэггүй. Хэний эрх хэзээ дуусахыг {APP_NAME} танд өөрөө сануулна.
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <div className={`mt-8 flex flex-col justify-center gap-3 sm:flex-row ${ENTER} motion-safe:delay-300`}>
               <Button asChild size="lg">
                 <Link href="/register">
                   {TRIAL_DAYS} хоног үнэгүй туршиж үзэх
@@ -90,7 +118,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <div className="-mt-36 px-4 sm:-mt-48">
+        <div className={`-mt-36 px-4 sm:-mt-48 ${ENTER} motion-safe:delay-500 motion-safe:duration-1000`}>
           <HeroPreview />
         </div>
 
@@ -103,22 +131,33 @@ export default async function HomePage() {
 
         <section className="border-y bg-card">
           <div className="mx-auto max-w-6xl space-y-10 px-4 py-20">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <SectionHeading eyebrow="Фитнес хайх" title="Фитнес хайж байна уу?">
-                Ойролцоох фитнесүүдийн үнэ, цагийн хуваарь, байршил, үйлчилгээг нэг дороос харьцуулаарай.
-              </SectionHeading>
-              <Button asChild size="lg" variant="outline" className="shrink-0">
-                <Link href="/gyms">
-                  <LocateFixedIcon />
-                  Ойролцоох фитнес хайх
-                </Link>
-              </Button>
+            <div data-reveal className="dark relative isolate overflow-hidden rounded-3xl bg-background text-foreground">
+              <Image
+                src={directoryGym}
+                alt=""
+                fill
+                placeholder="blur"
+                sizes="(min-width: 1152px) 1120px, 100vw"
+                className="-z-10 object-cover object-[center_45%] opacity-60"
+              />
+              <div aria-hidden className="absolute inset-0 -z-10 bg-linear-to-r from-ink via-ink/85 to-ink/20" />
+              <div className="flex flex-col gap-8 px-6 py-12 sm:px-12 sm:py-16 md:flex-row md:items-end md:justify-between">
+                <SectionHeading eyebrow="Фитнес хайх" title="Фитнес хайж байна уу?">
+                  Ойролцоох фитнесүүдийн үнэ, цагийн хуваарь, байршил, үйлчилгээг нэг дороос харьцуулаарай.
+                </SectionHeading>
+                <Button asChild size="lg" className="shrink-0 self-start md:self-auto">
+                  <Link href="/gyms">
+                    <LocateFixedIcon />
+                    Ойролцоох фитнес хайх
+                  </Link>
+                </Button>
+              </div>
             </div>
             {gyms.length > 0 && (
               <>
                 <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {gyms.map((gym) => (
-                    <li key={gym.slug} className="flex">
+                  {gyms.map((gym, i) => (
+                    <li key={gym.slug} data-reveal style={revealDelay(i)} className="flex">
                       <GymCard gym={gym} distance={null} />
                     </li>
                   ))}
@@ -142,8 +181,23 @@ export default async function HomePage() {
           </section>
         )}
 
-        <section className="px-4 pb-20">
-          <div className="dark mx-auto max-w-6xl overflow-hidden rounded-3xl bg-background px-6 py-14 text-center text-foreground sm:py-20">
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div
+            data-reveal
+            className="dark relative isolate overflow-hidden rounded-3xl bg-background px-6 py-16 text-center text-foreground sm:py-24"
+          >
+            <Image
+              src={ctaDumbbell}
+              alt=""
+              fill
+              placeholder="blur"
+              sizes="(min-width: 1152px) 1120px, 100vw"
+              className="-z-10 object-cover object-[center_55%] opacity-55"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,var(--ink)_15%,transparent_80%)] opacity-90"
+            />
             <h2 className="mx-auto max-w-2xl font-display text-3xl leading-tight tracking-tight text-balance sm:text-4xl">
               Дараагийн сунгалтыг <span className="text-brand">бүү алд</span>
             </h2>

@@ -24,7 +24,7 @@ export function HeroPreview() {
   const months = REVENUE.map((_, i) => ((month - REVENUE.length + i + 12) % 12) + 1);
 
   return (
-    <div aria-hidden className="light relative mx-auto max-w-5xl select-none">
+    <div aria-hidden data-tilt className="light relative mx-auto max-w-5xl select-none">
       <div className="absolute inset-x-10 -top-6 h-40 rounded-full bg-brand/25 blur-3xl" />
 
       <div className="relative overflow-hidden rounded-2xl border bg-background text-foreground shadow-2xl shadow-black/40">

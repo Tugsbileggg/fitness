@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { TRIAL_DAYS } from "@/lib/config";
 import { formatMNT } from "@/lib/money";
+import { revealDelay } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export type LandingPlan = {
@@ -23,6 +24,9 @@ export function PricingPlans({ plans }: { plans: LandingPlan[] }) {
         return (
           <div
             key={plan.id}
+            data-reveal
+            data-glow
+            style={revealDelay(i, 100)}
             className={cn(
               "relative flex flex-col gap-6 rounded-3xl border bg-card p-6 text-card-foreground",
               isFeatured && "dark border-transparent bg-background text-foreground lg:-my-3 lg:py-9",

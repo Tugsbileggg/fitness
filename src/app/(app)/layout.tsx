@@ -1,5 +1,6 @@
 import { DesktopSidebar, MobileBottomNav, MobileHeader } from "@/components/app-shell/app-nav";
 import { SubscriptionBanner } from "@/components/app-shell/subscription-banner";
+import { PointerGlow } from "@/components/motion-effects";
 import { Toaster } from "@/components/ui/toaster";
 import { requireGymContext } from "@/lib/auth/context";
 
@@ -19,6 +20,7 @@ export default async function GymAppLayout({ children }: { children: React.React
         <MobileBottomNav role={gym.role} />
       </div>
       <Toaster />
+      <PointerGlow />
     </div>
   );
 }

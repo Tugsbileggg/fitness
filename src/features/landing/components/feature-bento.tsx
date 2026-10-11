@@ -2,23 +2,31 @@ import { BellRingIcon, CalendarClockIcon, SmartphoneIcon, UsersIcon, WalletIcon 
 import type { ReactNode } from "react";
 import { addMonthsISO, formatDate, todayUB } from "@/lib/dates";
 import { formatMNT } from "@/lib/money";
+import { revealDelay } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 function Tile({
   icon: Icon,
   title,
   text,
+  index,
   children,
   className,
 }: {
   icon: typeof BellRingIcon;
   title: string;
   text: string;
+  index: number;
   children?: ReactNode;
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col gap-5 overflow-hidden rounded-3xl border bg-card p-6 text-card-foreground", className)}>
+    <div
+      data-reveal
+      data-glow
+      style={revealDelay(index)}
+      className={cn("flex flex-col gap-5 overflow-hidden rounded-3xl border bg-card p-6 text-card-foreground", className)}
+    >
       <div className="space-y-2">
         <span className="flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
           <Icon className="size-5" />
@@ -44,6 +52,7 @@ export function FeatureBento() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Tile
         icon={BellRingIcon}
+        index={0}
         title="Эрх дуусахыг анзаарна"
         text="Хэдэн хоногийн дараа эрх нь дуусах үйлчлүүлэгчид өнгөөр ялгагдаж, нэг дор харагдана. Утасдсан эсэхээ ч тэмдэглэнэ."
         className="lg:col-span-2"
@@ -61,6 +70,7 @@ export function FeatureBento() {
 
       <Tile
         icon={CalendarClockIcon}
+        index={1}
         title="Сунгалт автоматаар"
         text="Төлбөр бүртгэхэд дуусах огноо өөрөө бодогдоно. Хугацаа нь дуусаагүй бол үргэлжлүүлж сунгана."
       >
@@ -71,7 +81,12 @@ export function FeatureBento() {
         </div>
       </Tile>
 
-      <div className="dark flex flex-col gap-5 overflow-hidden rounded-3xl bg-background p-6 text-foreground">
+      <div
+        data-reveal
+        data-glow
+        style={revealDelay(2)}
+        className="dark flex flex-col gap-5 overflow-hidden rounded-3xl bg-background p-6 text-foreground"
+      >
         <div className="space-y-2">
           <span className="flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
             <WalletIcon className="size-5" />
@@ -93,6 +108,7 @@ export function FeatureBento() {
 
       <Tile
         icon={UsersIcon}
+        index={3}
         title="Багш нартайгаа хамт"
         text="Багш нарыг имэйлээр урьж нэвтрүүлнэ. Тэд үйлчлүүлэгч бүртгэж, төлбөр авна. Орлогын тайлан зөвхөн танд харагдана."
       >
@@ -113,6 +129,7 @@ export function FeatureBento() {
 
       <Tile
         icon={SmartphoneIcon}
+        index={4}
         title="Утсан дээр бүрэн ажиллана"
         text="Апп татах шаардлагагүй. Утас, таблет, компьютерийн хөтчөөс шууд ашиглана."
       />

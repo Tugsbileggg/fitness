@@ -14,6 +14,7 @@ export function GymCard({ gym, distance }: { gym: PublicGymSummary; distance: nu
   return (
     <Link
       href={`/gyms/${gym.slug}`}
+      data-glow
       className="group flex w-full flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">

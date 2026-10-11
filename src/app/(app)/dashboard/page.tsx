@@ -31,6 +31,7 @@ function Stat({
 }) {
   const content = (
     <div
+      data-glow
       className={cn(
         "flex h-full flex-col gap-1 rounded-2xl border bg-card p-4 text-card-foreground transition-colors",
         !href && className,
